@@ -186,7 +186,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show"
   clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200);}
 function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 function openModal(html){modal.innerHTML=html;overlay.classList.add("open");}
-function closeModal(){overlay.classList.remove("open");modal.innerHTML="";}
+function closeModal(){if(window._stopCamera){try{window._stopCamera();}catch(e){}}overlay.classList.remove("open");modal.innerHTML="";}
 overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal();});
 
 /* ---------- Navegação ---------- */
@@ -301,6 +301,13 @@ function itemForm(id){
       </div>
       <input type="file" id="f_photo_cam" accept="image/*" capture="environment" hidden>
       <input type="file" id="f_photo_lib" accept="image/*" hidden>
+      <div id="camWrap" style="display:none;margin-top:8px">
+        <video id="camVideo" autoplay playsinline muted style="width:100%;border-radius:10px;background:#000;aspect-ratio:4/3;object-fit:cover"></video>
+        <div class="photo-btns" style="margin-top:8px">
+          <button type="button" class="btn sm" id="camShot">📸 Capturar</button>
+          <button type="button" class="btn ghost sm" id="camCancel">Cancelar</button>
+        </div>
+      </div>
     </div>
     <div class="field"><label>Nome *</label><input id="f_name" value="${esc(it.name)}" placeholder="Ex: Prato raso branco"></div>
     <div class="field"><label>Unidade *</label>
@@ -334,7 +341,22 @@ function itemForm(id){
     const p=$("#f_preview");p.src=URL.createObjectURL(blob);p.style.display="block";
     $("#photoStatus").textContent="foto pronta ✓";
   };
-  $("#btnCam").addEventListener("click",()=>$("#f_photo_cam").click());
+  const stopCamera=()=>{ if(window._camStream){window._camStream.getTracks().forEach(t=>t.stop());window._camStream=null;} const cw=$("#camWrap"); if(cw)cw.style.display="none"; };
+  window._stopCamera=stopCamera;
+  $("#btnCam").addEventListener("click",async()=>{
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$("#f_photo_cam").click();return;}
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
+      window._camStream=stream; const v=$("#camVideo"); v.srcObject=stream; $("#camWrap").style.display="block";
+    }catch(err){ console.error(err); toast("Câmera indisponível — use a Galeria"); $("#f_photo_cam").click(); }
+  });
+  $("#camCancel").addEventListener("click",stopCamera);
+  $("#camShot").addEventListener("click",()=>{
+    const v=$("#camVideo"); let w=v.videoWidth||1280,h=v.videoHeight||960; const md=1280;
+    if(w>h&&w>md){h=Math.round(h*md/w);w=md;}else if(h>md){w=Math.round(w*md/h);h=md;}
+    const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(v,0,0,w,h);
+    c.toBlob(blob=>{ if(!blob)return; state.pendingPhoto=blob; const p=$("#f_preview");p.src=URL.createObjectURL(blob);p.style.display="block"; $("#photoStatus").textContent="foto pronta ✓"; stopCamera(); },"image/jpeg",0.82);
+  });
   $("#btnLib").addEventListener("click",()=>$("#f_photo_lib").click());
   $("#f_photo_cam").addEventListener("change",onPhoto);
   $("#f_photo_lib").addEventListener("change",onPhoto);
