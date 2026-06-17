@@ -163,6 +163,7 @@ const overlay = $("#overlay");
 const modal = $("#modal");
 let state = { view:"catalogo", items:[], q:"", fSupplier:"", fColor:"", fUnidade:"", pendingPhoto:null };
 const UNIDADES = ["Lola CCMQ","Central","Lola MAC"];
+const UNIDADE_COR = {"Lola CCMQ":"#A8272A","Central":"#2D6A4F","Lola MAC":"#1A5276"};
 
 // Redimensiona/comprime a foto no próprio celular antes de enviar (rápido no 4G)
 function compressImage(file, maxDim=1280, quality=0.82){
@@ -271,7 +272,7 @@ function cardItem(i){
         ${i.supplier?`<div><b>Fornecedor:</b> ${esc(i.supplier)}</div>`:""}
       </div>
       <div class="chips">
-        ${i.unidade?`<span class="chip unidade">${esc(i.unidade)}</span>`:`<span class="chip semuni">sem unidade</span>`}
+        ${i.unidade?`<span class="chip unidade" style="background:${UNIDADE_COR[i.unidade]||'var(--brand)'}">${esc(i.unidade)}</span>`:`<span class="chip semuni">sem unidade</span>`}
         ${i.color?`<span class="chip">${esc(i.color)}</span>`:""}
         ${i.category?`<span class="chip">${esc(i.category)}</span>`:""}
       </div>
