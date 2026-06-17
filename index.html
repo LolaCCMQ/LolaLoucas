@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Louças & Utensílios · Portal Lola</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FDFAF7; --card:#ffffff; --ink:#1E0A0A; --muted:#888888;
+    --line:#e8d5d5; --brand:#A8272A; --brand-d:#7C1A1C; --ok:#2D6A4F;
+    --warn:#C94040; --danger:#A8272A; --chip:#F9ECEC; --warm:#F2EDE8;
+    --shadow:0 2px 16px rgba(168,39,42,.10);
+    --serif:"Playfair Display",Georgia,serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Nunito,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+  header{position:sticky;top:0;z-index:30;background:#fff;
+         border-bottom:2px solid var(--brand)}
+  .bar{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:14px}
+  .logo{display:flex;align-items:center;gap:11px;line-height:1}
+  .logo-svg{height:40px;width:auto;display:block}
+  .logo span{font-family:Nunito,sans-serif;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.2px;
+             padding-left:11px;border-left:1px solid var(--line)}
+  nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+  nav button{border:0;background:transparent;color:var(--brand-d);font-weight:700;font-size:14px;
+             padding:8px 14px;border-radius:999px;cursor:pointer}
+  nav button:hover{background:var(--chip)}
+  nav button.active{background:var(--brand);color:#fff}
+  main h2{font-family:var(--serif)}
+  main{max-width:1100px;margin:0 auto;padding:18px 16px 80px}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  input,select,textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);
+        border-radius:10px;padding:10px 12px;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:var(--brand)}
+  .search{flex:1;min-width:160px}
+  .btn{border:0;background:var(--brand);color:#fff;font-weight:700;font-size:14px;padding:10px 16px;
+       border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+  .btn:hover{background:var(--brand-d)}
+  .btn.ghost{background:var(--chip);color:var(--ink)}
+  .btn.ghost:hover{background:#e7ddd0}
+  .btn.sm{padding:7px 11px;font-size:13px}
+  .btn.danger{background:var(--danger)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+  .thumb{aspect-ratio:4/3;background:#f3ede4 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="%23d9cdbd"><path d="M4 6h40v36H4z" fill="none" stroke="%23d9cdbd" stroke-width="2"/><circle cx="16" cy="18" r="4"/><path d="M8 38l12-12 8 8 6-6 8 8"/></svg>') center/40px no-repeat;
+         display:flex;align-items:center;justify-content:center}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .card .body{padding:12px}
+  .card h3{margin:0 0 4px;font-size:15px}
+  .meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .meta b{color:var(--ink);font-weight:600}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .chip{background:var(--chip);border-radius:999px;padding:3px 9px;font-size:11.5px;color:var(--brand-d);font-weight:600}
+  .qty{display:inline-flex;align-items:center;gap:8px;margin-top:10px;font-weight:800;font-size:18px;color:var(--brand)}
+  .qty small{font-weight:600;font-size:11px;color:var(--muted)}
+  .card-actions{display:flex;gap:6px;padding:0 12px 12px}
+  .row{display:flex;align-items:center;gap:10px}
+  .spacer{flex:1}
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(40,30,20,.45);display:none;align-items:flex-start;
+           justify-content:center;z-index:50;padding:24px 14px;overflow:auto}
+  .overlay.open{display:flex}
+  .modal{background:var(--card);width:100%;max-width:560px;border-radius:16px;box-shadow:var(--shadow);
+         padding:20px;margin:auto}
+  .modal h2{margin:0 0 14px;font-size:19px}
+  .field{margin-bottom:12px;display:flex;flex-direction:column;gap:5px}
+  .field label{font-size:12.5px;font-weight:600;color:var(--muted)}
+  .field2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .modal-actions{display:flex;gap:10px;margin-top:8px}
+  .preview{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:none;margin-bottom:6px}
+  .photo-btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  /* Lists (contagens / eventos) */
+  .list{display:flex;flex-direction:column;gap:10px}
+  .listitem{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow);
+            display:flex;align-items:center;gap:12px;cursor:pointer}
+  .listitem:hover{border-color:var(--brand)}
+  .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px}
+  .badge.aberta,.badge.planejado{background:#eef4ee;color:var(--ok)}
+  .badge.fechada,.badge.concluido{background:#f0eae2;color:var(--muted)}
+  .badge.em_andamento{background:#fbeede;color:var(--warn)}
+  .count-row,.evt-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .count-row .name{flex:1}
+  .count-row input{width:90px;text-align:center}
+  .diff{font-size:12px;font-weight:700;min-width:54px;text-align:right}
+  .diff.pos{color:var(--ok)} .diff.neg{color:var(--danger)} .diff.zero{color:var(--muted)}
+  .mini{font-size:12px;color:var(--muted)}
+  .empty{text-align:center;color:var(--muted);padding:50px 20px}
+  .empty svg{opacity:.5;margin-bottom:10px}
+  .back{background:none;border:0;color:var(--brand);font-weight:700;cursor:pointer;padding:0;margin-bottom:12px;font-size:14px}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+         padding:11px 18px;border-radius:10px;font-size:14px;font-weight:600;z-index:99;opacity:0;
+         transition:opacity .25s, transform .25s;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+  .checkwrap{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;cursor:pointer;user-select:none}
+  .checkwrap input{width:18px;height:18px;accent-color:var(--ok)}
+  .returned{opacity:.55}
+  .setup{max-width:640px;margin:60px auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:var(--shadow)}
+  .setup h2{margin-top:0}
+  .setup code{background:var(--chip);padding:2px 6px;border-radius:6px;font-size:13px}
+  /* FAB mobile */
+  .fab{display:none;position:fixed;right:18px;bottom:18px;z-index:40;width:58px;height:58px;border-radius:50%;
+       border:0;background:var(--brand);color:#fff;font-size:30px;line-height:1;box-shadow:0 6px 18px rgba(168,39,42,.35);cursor:pointer}
+  @media(max-width:560px){
+    .field2{grid-template-columns:1fr}
+    .bar{flex-wrap:wrap;gap:10px;padding:10px 14px}
+    nav{width:100%;margin-left:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    nav button{flex:1;white-space:nowrap}
+    .toolbar{gap:8px}
+    .search{flex-basis:100%}
+    .toolbar select{flex:1 1 45%}
+    .toolbar .btn{flex:1 1 100%;justify-content:center;padding:13px 16px;font-size:15px}
+    .modal{max-width:100%;border-radius:14px;padding:16px}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+    .btn,.checkwrap input,nav button{min-height:44px}
+    .count-row input{width:72px;height:42px}
+    .fab{display:flex;align-items:center;justify-content:center}
+    main{padding-bottom:96px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="logo"><img class="logo-svg" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxOS4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iQ2FtYWRhXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIxOCA0MCA3MDIgNDMyIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA3OTIgNjEyOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPg0KCS5zdDB7ZmlsbDojQUEyQjJCO30NCjwvc3R5bGU+DQo8ZyBpZD0iWE1MSURfMl8iPg0KCTxnIGlkPSJYTUxJRF8xNl8iPg0KCQk8ZyBpZD0iWE1MSURfMjdfIj4NCgkJCTxwYXRoIGlkPSJYTUxJRF8zNF8iIGNsYXNzPSJzdDAiIGQ9Ik01MTUuMiwxNzkuMmMtMC4yLTAuMi0wLjMtMC42LTAuMy0xdi0xOC42YzAtMC41LDAuMS0wLjgsMC4zLTFjMC4yLTAuMiwwLjYtMC4zLDEuMS0wLjNoOS4yDQoJCQkJYzIuMywwLDQsMC41LDUuMiwxLjZjMS4xLDEuMSwxLjcsMi41LDEuNyw0LjRjMCwxLTAuMiwxLjktMC43LDIuNmMtMC41LDAuOC0xLjEsMS4zLTEuOSwxLjdjMi4xLDAuNywzLjIsMi4zLDMuMiw0LjcNCgkJCQljMCwxLjItMC4zLDIuMy0wLjgsMy4yYy0wLjYsMS0xLjQsMS43LTIuNSwyLjNjLTEuMSwwLjYtMi41LDAuOC00LjEsMC44aC05LjJDNTE1LjgsMTc5LjUsNTE1LjQsMTc5LjQsNTE1LjIsMTc5LjJ6DQoJCQkJIE01MjQuNiwxNjYuOWMwLjgsMCwxLjUtMC4yLDEuOS0wLjZjMC41LTAuNCwwLjctMSwwLjctMS44YzAtMC45LTAuMi0xLjUtMC42LTEuOGMtMC40LTAuNC0xLjEtMC41LTItMC41aC00LjV2NC44SDUyNC42eg0KCQkJCSBNNTI1LjEsMTc1LjhjMC45LDAsMS42LTAuMiwyLTAuN2MwLjUtMC41LDAuNy0xLjEsMC43LTEuOWMwLTAuOS0wLjMtMS42LTAuOC0yYy0wLjUtMC40LTEuMi0wLjctMi4yLTAuN2gtNC44djUuM0g1MjUuMXoiLz4NCgkJCTxwYXRoIGlkPSJYTUxJRF8zMV8iIGNsYXNzPSJzdDAiIGQ9Ik01NDIuMywxNzljMC0wLjIsMC0wLjMsMC4xLTAuNWw4LjEtMTkuM2MwLjItMC40LDAuMy0wLjYsMC41LTAuN2MwLjItMC4xLDAuNC0wLjIsMC44LTAuMg0KCQkJCWgyLjNjMC4zLDAsMC42LDAuMSwwLjcsMC4yYzAuMiwwLjEsMC4zLDAuNCwwLjUsMC43bDguMSwxOS4zYzAuMSwwLjIsMC4xLDAuNCwwLjEsMC41YzAsMC40LTAuMiwwLjUtMC42LDAuNWgtMy44DQoJCQkJYy0wLjMsMC0wLjUsMC0wLjYtMC4xYy0wLjEtMC4xLTAuMy0wLjMtMC40LTAuNWwtMS40LTMuN0g1NDlsLTEuNCwzLjdjLTAuMSwwLjItMC4yLDAuNC0wLjQsMC41Yy0wLjEsMC4xLTAuNCwwLjEtMC43LDAuMWgtMy44DQoJCQkJQzU0Mi41LDE3OS41LDU0Mi4zLDE3OS40LDU0Mi4zLDE3OXogTTU1NS40LDE3MS42bC0yLjYtNi44bC0yLjYsNi44SDU1NS40eiIvPg0KCQkJPHBhdGggaWQ9IlhNTElEXzI4XyIgY2xhc3M9InN0MCIgZD0iTTU3NS43LDE3OS4yYy0wLjItMC4yLTAuMy0wLjYtMC4zLTF2LTE4LjZjMC0wLjUsMC4xLTAuOCwwLjMtMWMwLjItMC4yLDAuNi0wLjMsMS4xLTAuM2g3LjkNCgkJCQljNS4zLDAsNy45LDIuMyw3LjksNi45YzAsMS41LTAuMywyLjctMC45LDMuOGMtMC42LDEtMS42LDEuOC0yLjgsMi40bDMuMyw3LjJjMC4xLDAuMSwwLjEsMC4zLDAuMSwwLjRjMCwwLjQtMC4yLDAuNi0wLjcsMC42DQoJCQkJaC0zLjVjLTAuMywwLTAuNSwwLTAuNy0wLjFjLTAuMS0wLjEtMC4zLTAuMi0wLjQtMC41bC0yLjktNi45aC0zLjd2Ni4xYzAsMC41LTAuMSwwLjgtMC4zLDFjLTAuMiwwLjItMC42LDAuMy0xLjEsMC4zaC0yLjMNCgkJCQlDNTc2LjMsMTc5LjUsNTc2LDE3OS40LDU3NS43LDE3OS4yeiBNNTg0LDE2OC4zYzEuMiwwLDIuMS0wLjMsMi43LTAuOGMwLjYtMC41LDAuOS0xLjMsMC45LTIuNGMwLTEuMS0wLjMtMS45LTAuOC0yLjQNCgkJCQljLTAuNi0wLjUtMS40LTAuNy0yLjQtMC43aC0zLjd2Ni4zSDU4NHoiLz4NCgkJPC9nPg0KCQk8ZyBpZD0iWE1MSURfMTdfIj4NCgkJCTxwYXRoIGlkPSJYTUxJRF8yNV8iIGNsYXNzPSJzdDAiIGQ9Ik01MTcuMywyMTEuNGMtMi0xLjktMy00LjctMy04LjJjMC0zLjYsMS02LjQsMi45LTguM2MyLTEuOSw0LjctMi44LDguNC0yLjgNCgkJCQljMS41LDAsMi45LDAuMiw0LjEsMC41YzEuMiwwLjMsMi4zLDAuNywzLjEsMS4zYzAuMiwwLjEsMC4zLDAuMywwLjMsMC41YzAsMC4yLTAuMSwwLjMtMC4yLDAuNWwtMS4xLDEuOQ0KCQkJCWMtMC4xLDAuMi0wLjMsMC4zLTAuNCwwLjNjLTAuMSwwLTAuMy0wLjEtMC41LTAuMmMtMS4zLTAuOC0yLjktMS4xLTQuNy0xLjFjLTIuMSwwLTMuOCwwLjYtNSwxLjljLTEuMiwxLjItMS44LDMuMS0xLjgsNS41DQoJCQkJYzAsMi41LDAuNiw0LjMsMS45LDUuNWMxLjIsMS4yLDIuOSwxLjgsNS4xLDEuOGMyLDAsMy42LTAuNCw0LjktMS4xYzAuMi0wLjEsMC40LTAuMiwwLjUtMC4yYzAuMSwwLDAuMywwLjEsMC40LDAuM2wxLjIsMi4xDQoJCQkJYzAuMSwwLjEsMC4xLDAuMywwLjEsMC40YzAsMC4xLTAuMSwwLjMtMC40LDAuNWMtMS42LDEuMi00LjEsMS44LTcuNSwxLjhDNTIyLjEsMjE0LjMsNTE5LjIsMjEzLjQsNTE3LjMsMjExLjR6Ii8+DQoJCQk8cGF0aCBpZD0iWE1MSURfMjNfIiBjbGFzcz0ic3QwIiBkPSJNNTQ3LjEsMjExLjRjLTItMS45LTMtNC43LTMtOC4yYzAtMy42LDEtNi40LDIuOS04LjNjMS45LTEuOSw0LjctMi44LDguNC0yLjgNCgkJCQljMS41LDAsMi45LDAuMiw0LjIsMC41YzEuMiwwLjMsMi4zLDAuNywzLjEsMS4zYzAuMiwwLjEsMC4zLDAuMywwLjMsMC41YzAsMC4yLTAuMSwwLjMtMC4yLDAuNWwtMS4xLDEuOQ0KCQkJCWMtMC4xLDAuMi0wLjMsMC4zLTAuNCwwLjNjLTAuMSwwLTAuMy0wLjEtMC41LTAuMmMtMS4zLTAuOC0yLjktMS4xLTQuNy0xLjFjLTIuMSwwLTMuOCwwLjYtNSwxLjljLTEuMiwxLjItMS44LDMuMS0xLjgsNS41DQoJCQkJYzAsMi41LDAuNiw0LjMsMS45LDUuNWMxLjIsMS4yLDIuOSwxLjgsNS4xLDEuOGMyLDAsMy42LTAuNCw0LjktMS4xYzAuMi0wLjEsMC40LTAuMiwwLjUtMC4yYzAuMSwwLDAuMywwLjEsMC40LDAuM2wxLjIsMi4xDQoJCQkJYzAuMSwwLjEsMC4xLDAuMywwLjEsMC40YzAsMC4xLTAuMSwwLjMtMC40LDAuNWMtMS42LDEuMi00LjEsMS44LTcuNSwxLjhDNTUxLjksMjE0LjMsNTQ5LjEsMjEzLjQsNTQ3LjEsMjExLjR6Ii8+DQoJCQk8cGF0aCBpZD0iWE1MSURfMjFfIiBjbGFzcz0ic3QwIiBkPSJNNTc1LjYsMjEzLjVjLTAuMi0wLjItMC4zLTAuNi0wLjMtMXYtMTguNmMwLTAuNSwwLjEtMC44LDAuMy0xYzAuMi0wLjIsMC42LTAuMywxLjEtMC4zaDIuMw0KCQkJCWMwLjQsMCwwLjcsMCwwLjksMC4xYzAuMiwwLjEsMC40LDAuMywwLjUsMC41bDUuNCwxMi44bDUuNC0xMi44YzAuMS0wLjMsMC4zLTAuNSwwLjUtMC41YzAuMi0wLjEsMC41LTAuMSwwLjktMC4xaDIuMw0KCQkJCWMwLjUsMCwwLjksMC4xLDEuMSwwLjNjMC4yLDAuMiwwLjMsMC42LDAuMywxdjE4LjZjMCwwLjUtMC4xLDAuOC0wLjMsMWMtMC4yLDAuMi0wLjYsMC4zLTEuMSwwLjNoLTEuOWMtMC41LDAtMC45LTAuMS0xLjEtMC4zDQoJCQkJYy0wLjItMC4yLTAuMy0wLjYtMC4zLTF2LTExLjhsLTQuMiw5LjRjLTAuMiwwLjQtMC40LDAuNy0wLjYsMC45Yy0wLjIsMC4yLTAuNSwwLjMtMSwwLjNjLTAuNSwwLTAuOC0wLjEtMS0wLjMNCgkJCQljLTAuMi0wLjItMC40LTAuNS0wLjYtMC45bC00LjItOS40djExLjhjMCwwLjUtMC4xLDAuOC0wLjMsMWMtMC4yLDAuMi0wLjYsMC4zLTEuMSwwLjNoLTEuOQ0KCQkJCUM1NzYuMiwyMTMuOCw1NzUuOSwyMTMuNyw1NzUuNiwyMTMuNXoiLz4NCgkJCTxwYXRoIGlkPSJYTUxJRF8xOF8iIGNsYXNzPSJzdDAiIGQ9Ik02MTgsMjE4Yy0xLjItMS0xLjktMi4zLTIuMS0zLjljLTIuOC0wLjQtNS0xLjUtNi41LTMuNGMtMS41LTEuOS0yLjItNC40LTIuMi03LjYNCgkJCQljMC0zLjUsMC45LTYuMywyLjgtOC4yYzEuOS0xLjksNC42LTIuOSw4LjEtMi45YzMuNSwwLDYuMiwxLDguMSwyLjljMS45LDEuOSwyLjgsNC43LDIuOCw4LjJjMCwzLjItMC44LDUuOC0yLjQsNy43DQoJCQkJYy0xLjYsMS45LTMuOSwzLTYuOSwzLjNjMC4xLDAuNywwLjQsMS4yLDEsMS42YzAuNiwwLjMsMS4zLDAuNSwyLjEsMC41YzEuMSwwLDItMC4zLDIuOC0wLjhjMC4xLTAuMSwwLjMtMC4xLDAuMy0wLjENCgkJCQljMC4xLDAsMC4yLDAuMSwwLjMsMC4ybDEuMiwxLjljMC4xLDAuMSwwLjEsMC4yLDAuMSwwLjNjMCwwLjEtMC4xLDAuMy0wLjMsMC40Yy0wLjcsMC41LTEuMywwLjgtMi4xLDFjLTAuNywwLjItMS42LDAuMy0yLjYsMC4zDQoJCQkJQzYyMC44LDIxOS41LDYxOS4yLDIxOSw2MTgsMjE4eiBNNjIyLjUsMjA4LjdjMS0xLjIsMS41LTMuMSwxLjUtNS41YzAtMi40LTAuNS00LjMtMS41LTUuNWMtMS0xLjItMi40LTEuOS00LjMtMS45DQoJCQkJYy0xLjksMC0zLjQsMC42LTQuMywxLjljLTEsMS4yLTEuNCwzLjEtMS40LDUuNWMwLDIuNCwwLjUsNC4zLDEuNCw1LjVjMSwxLjIsMi40LDEuOSw0LjMsMS45QzYyMC4xLDIxMC42LDYyMS41LDIxMCw2MjIuNSwyMDguNw0KCQkJCXoiLz4NCgkJPC9nPg0KCTwvZz4NCgk8ZyBpZD0iWE1MSURfM18iPg0KCQk8cGF0aCBpZD0iWE1MSURfMTRfIiBjbGFzcz0ic3QwIiBkPSJNMTY2LjIsMjI3LjJjMC40LDEyLjksMC40LDI1LjQsMC40LDM2LjljMCwyMy4xLTAuNCw0My4yLTEuOCw2MWMtMS44LDI0LjUtNC40LDQyLjMtNy42LDUzLjQNCgkJCWM1OC43LDE2LjksOTcuNSw4My43LDE0Miw4My43YzM3LjQsMCwxOC4yLTM3LjgsMzguNy0zNy44YzYuMiwwLDExLjEsNC45LDExLjEsMTEuMWMwLDI4LjktMjEuNCw0OS40LTQ5LjgsNDkuNA0KCQkJYy02NC4xLDAtMTAxLjktODcuNy0xNjguMi04Ny43Yy02LjcsMC0xMy40LDAuOS0xOS42LDMuMWMtMy42LDEuMy03LjYsMy4xLTExLjYsMy4xYy02LjIsMC0xMS4xLTQuOS0xMS4xLTExLjENCgkJCWMwLTcuMSw4LTExLjYsMTcuNC0xNC4yYzMuNi01Nyw1LjMtMTE1LjcsNS4zLTE3NS44YzAtMjEuNC0xLjgtNTEuMi00LjktODljMC0wLjQsMC0wLjksMC0xLjhjMC00LjksMi43LTguNSw4LjUtOS44DQoJCQljMS4zLTIuMiwzLjEtMy42LDUuOC00YzQuOS0xLjMsOS44LTEuOCwxNC4yLTEuOGMzLjYsMCw3LjYsMC40LDExLjEsMS4zaDAuOWM1LjgsMC40LDkuMyw0LDEwLjIsOS44DQoJCQlDMTYyLjIsMTQyLjIsMTY1LjMsMTgyLjMsMTY2LjIsMjI3LjJ6Ii8+DQoJCTxwYXRoIGlkPSJYTUxJRF8xMF8iIGNsYXNzPSJzdDAiIGQ9Ik0yNTkuNiwyNjMuN2M2LjctOCwxNC43LTEyLDIzLjYtMTJjNS4zLDAsMTAuNywxLjMsMTYuOSw0LjVjMTQuNyw2LjcsMjUuNCwxOS4xLDMyLDM3LjQNCgkJCWM0LDExLjEsNS44LDIyLjMsNS44LDMzLjhjMCw1LjgtMC40LDExLjEtMS4zLDE2LjljLTAuOSw2LjctMi43LDEzLjQtNC45LDIwYzUuMywwLDExLjEtMS4zLDE3LjgtNGMxNC43LTcuNiwyNC45LTI0LDMwLjctNTAuMw0KCQkJYzEuMy01LjgsNi43LTguOSwxMS4xLTguOWMxLjMsMCw1LjgsMCw4LjksNC45YzEuMywyLjIsMi4yLDQuNCwyLjIsNi43YzAsMC40LTAuNCwxLjMtMC40LDIuMmMtNy42LDMzLjQtMjEuOCw1NS4yLTQyLjcsNjUNCgkJCWMtOC45LDQuNS0xOC4zLDYuNy0yOC41LDYuN2MtNC45LDAtOCwwLTEwLjItMC40YzAsMC40LDAsMC40LTAuNCwwLjlsLTIuMiwyLjdjLTAuNCwwLjQtMC40LDAuNC0wLjksMC45DQoJCQljLTExLjYsMTMuNC0yNi4zLDIwLTQ0LjEsMjBjLTAuOSwwLTEuOCwwLTMuMSwwYy0yMC45LTEuMy0zNy40LTkuOC00OS40LTI1LjRjLTkuMy0xMi45LTE0LjItMjgtMTQuMi00NWMwLTEuMywwLTMuMSwwLTQuNQ0KCQkJYzEuMy0xOS4xLDcuMS0zNS4yLDE3LjQtNDguMWMzLjEtMy4xLDUuMy02LjIsNi43LTcuNmMxLjgtMi4yLDQuOS00LjQsOC45LTYuN2M0LTIuNyw5LjgtNCwxNi45LTQuNQ0KCQkJQzI1Ni41LDI2Ny43LDI1Ny44LDI2NiwyNTkuNiwyNjMuN3ogTTI2MC41LDM1MS45Yy01LjMtOS4zLTguOS0xOC43LTExLjEtMjcuMXYzLjZjLTAuNCw0LTAuNCw4LTAuNCwxMS42DQoJCQljMCwxMi45LDEuOCwyMy4xLDUuOCwzMS42YzQuNSw5LjMsMTEuMSwxNC43LDIwLDE2LjljNy42LTAuNCwxNC4yLTIuNywyMC45LTcuNkMyODEsMzc1LDI2OS40LDM2NS43LDI2MC41LDM1MS45eiBNMjY5LjQsMzA0LjcNCgkJCWMwLDEyLjksMy42LDI0LjksMTAuMiwzNS4yYzYuNywxMS4xLDE2LjUsMTguMiwyOS40LDIxLjhjMi4yLTUuOCw0LjUtMTIuNSw1LjgtMjAuNWMwLjQtNC41LDAuOS04LjUsMC45LTEyLjUNCgkJCWMwLTkuOC0xLjMtMTguNy00LjQtMjcuNmMtNC45LTEyLjUtMTEuNi0yMC45LTIwLjUtMjQuOWMtMi4yLTAuOS00LjQtMS44LTYuNy0xLjhjLTMuMSwwLTUuMywxLjMtNy42LDMuNg0KCQkJYy0wLjQsMC40LTEuMywxLjgtMS4zLDIuMmMwLDIuNy0xLjMsNS4zLTMuNiw3LjZDMjcwLjMsMjkzLjEsMjY5LjQsMjk4LjksMjY5LjQsMzA0Ljd6Ii8+DQoJCTxwYXRoIGlkPSJYTUxJRF83XyIgY2xhc3M9InN0MCIgZD0iTTQwNy44LDMwNy40YzAsMjUuOCwyLjcsNDUuOCw4LjUsNjAuNWMzLjEsNy42LDYuNywxMi41LDEwLjIsMTMuOGMwLjksMC40LDEuOCwwLjQsMi43LDAuNA0KCQkJYzMuMSwwLDcuMS0xLjgsMTItNC45aDAuNGMwLjQtMC40LDAuNC0wLjQsMC45LTAuNGM3LjYtNi4yLDE0LjctMTQuMiwyMC45LTIzLjZjOC41LTEzLjQsMTUuNi0zMC4zLDIyLjMtNTAuMw0KCQkJYzEuOC01LjgsNi43LTcuNiwxMC4yLTcuNmM0LjksMCwxMS4xLDMuNiwxMS4xLDEwLjdjMCwxLjMsMCwyLjItMC40LDMuNmMtMTIuNSw0MC45LTI5LjgsNjkuOS01Mi41LDg2LjMNCgkJCWMtOC45LDYuMi0xNy44LDEwLjItMjYuMywxMmMtNCwwLjktOCwxLjgtMTIuNSwxLjhjLTEuOCwwLTQtMC40LTUuOC0wLjRjLTExLjEtMC45LTIwLTcuNi0yNy4xLTIwYy01LjMtOS4zLTkuMy0yMi4zLTEyLjUtMzguNw0KCQkJYy0yLjctMTYuOS00LjQtMzUuNi00LjQtNTYuMWMwLTE1LjYsMC45LTMyLjUsMi43LTUwLjNjNC45LTQyLjcsMTIuNS03Ny40LDIzLjYtMTA0LjFjNi4yLTE1LjYsMTMuNC0yNy42LDIxLjQtMzYuMQ0KCQkJYzguOS05LjgsMTguNy0xNC43LDI5LjQtMTQuN2MwLjksMCwxLjgsMCwyLjcsMGMyOS44LDIuMiw0NS40LDE4LjIsNDYuNyw0My42YzAsMC45LDAsMS44LDAsMy4xYzAsMTcuOC03LjEsNDAuOS0yMS44LDY5LjQNCgkJCWMtMTAuNywyMC45LTI1LjQsNDQuMS00NC41LDcwLjNjLTguNSwxMS4xLTE0LjIsMTkuMS0xNy44LDI0QzQwNy44LDMwMi41LDQwNy44LDMwNC43LDQwNy44LDMwNy40eiBNNDUzLjIsMTE2DQoJCQljLTkuMyw4LTE4LjIsMjUuOC0yNi4zLDUzYy04LDI3LjYtMTMuOCw1Ny45LTE2LjksOTAuOGMxNy40LTI0LjksMzAuNy00Ni4zLDQwLjEtNjQuNWMxMy40LTI2LjMsMjAtNDYuMywyMC02MC41DQoJCQljMC0wLjQsMC0wLjQsMC0wLjljLTAuNC03LjEtMi43LTEyLTUuOC0xNS4xYy0yLjItMi4yLTQuOS00LTguOS01LjNDNDU0LjEsMTE0LjYsNDUzLjcsMTE1LjUsNDUzLjIsMTE2eiIvPg0KCQk8cGF0aCBpZD0iWE1MSURfNF8iIGNsYXNzPSJzdDAiIGQ9Ik02MTUuMiwyNTYuMmMxLjMsMCwzLjEsMC40LDYuMiwxLjhjNCwyLjcsNi4yLDYuMiw2LjIsMTAuMmMwLDAuOSwwLDEuOC0wLjQsMi43djEuMw0KCQkJYy0wLjQsMC40LTAuNCwwLjktMC40LDEuOHYwLjljMCwwLjQsMCwxLjMtMC40LDEuOGMtMC40LDMuNi0xLjgsMTIuOS0yLjIsMTZjLTEuOCwxNy44LTIuNywzMC43LTMuMSwzOS4yYzAsMi43LDAsNS4zLDAsNy42DQoJCQljMCwxNiwxLjMsMjgsNC45LDM2YzEuMywzLjYsMi43LDUuOCw0LjQsNy4xYzAuNCwwLDAuOSwwLjQsMS44LDAuNGMxLjMsMCwzLjEtMC45LDUuMy0xLjhjMS44LTAuNCwzLjEtMC45LDMuNi0wLjkNCgkJCWMxLjgtMS4zLDQuNS0zLjYsOC41LTcuNmM4LTguNSwxOS42LTI1LjQsMzUuMi01MC4zYzMuMS01LjMsOC01LjMsOS44LTUuM2MxLjgsMCw0LDAuNCw1LjgsMS44YzMuNiwyLjIsNS44LDUuMyw1LjgsOC41DQoJCQljMCwyLjItMC45LDQuNC0yLjIsNi43Yy04LjUsMTIuOS0xNC43LDIzLjEtMTkuNiwzMC4zYy03LjEsMTAuMi0xMy40LDE4LjMtMTguNywyMy42Yy0xMi45LDEzLjgtMjYuMywyMC45LTQwLjUsMjAuOQ0KCQkJYy0xLjgsMC00LDAtNS44LTAuNGMtMTguNy0yLjItMzEuMi0xNC43LTM2LjktMzYuOWMtMC40LTIuMi0wLjktNC0wLjktNC45Yy03LjEsMTMuOC0xNC43LDI0LTIzLjEsMjkuOA0KCQkJYy0xMC4yLDcuNi0yMCwxMS42LTI5LjgsMTEuNmMtMS44LDAtMy4xLTAuNC00LjktMC40Yy0xMS4xLTEuMy0xOS42LTcuMS0yNS44LTE2LjljLTguOS0xMi45LTEzLjMtMjguOS0xMy4zLTQ4LjUNCgkJCWMwLTUuMywwLTExLjEsMC45LTE3LjRjMy4xLTI4LjUsMTIuOS00OSwyOS40LTYxLjljOC45LTYuNywxOC4yLTkuOCwyOC41LTkuOGMxMy40LDAsMjgsNS4zLDQ0LjEsMTYuNWMwLTEuMywwLjQtMy4xLDAuOS01LjMNCgkJCWMwLjQtMy4xLDIuMi01LjMsNS4zLTcuNmMyLjItMS4zLDQuNS0xLjgsNy4xLTEuOEM2MDIuMywyNTUuMyw2MDguMSwyNTQuOCw2MTUuMiwyNTYuMnogTTU3Ny40LDI5MGMtNi43LTQuOS0xMy40LTguOS0yMC41LTEyDQoJCQljLTEuMy0wLjQtMy4xLTAuNC00LjQtMC40Yy02LjIsMC0xMiwzLjYtMTYuOSwxMC4yYy03LjYsOS44LTExLjYsMjMuMS0xMiw0MC41YzAsMS4zLDAsMy4xLDAsNC41YzAsMTQuNywyLjcsMjUuOCw4LDMzLjQNCgkJCWMyLjIsMy42LDUuMyw1LjgsOC45LDYuMmMwLjksMCwxLjgsMC40LDIuMiwwLjRjMy42LDAsNy42LTEuOCwxMi00LjRjMTEuMS0xNi41LDE5LjYtNDIuMywyNC45LTc3DQoJCQlDNTc4LjMsMjkwLjksNTc3LjgsMjkwLjQsNTc3LjQsMjkweiIvPg0KCTwvZz4NCjwvZz4NCjwvc3ZnPg0K" alt="Lola"><span>Louças &amp; Utensílios</span></div>
+    <nav id="nav">
+      <button data-view="catalogo" class="active">Catálogo</button>
+      <button data-view="contagens">Contagens</button>
+      <button data-view="eventos">Eventos</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main"><div class="empty">Carregando…</div></main>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+<button class="fab" id="fab" title="Adicionar">+</button>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO — preencher com os dados do seu projeto Supabase
+   (Project Settings → API)
+   ============================================================ */
+const SUPABASE_URL  = "https://mvjbsdpfjhywhaonvpfl.supabase.co";
+const SUPABASE_ANON = "sb_publishable_VMJzYe1AwL9zEoFs-ljUIw_OOkDpqhy";
+/* ============================================================ */
+
+let sb = null;
+const configured = SUPABASE_URL.indexOf("http") === 0;
+if (configured) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const $ = (s,el=document)=>el.querySelector(s);
+const main = $("#main");
+const overlay = $("#overlay");
+const modal = $("#modal");
+let state = { view:"catalogo", items:[], q:"", fSupplier:"", fColor:"", pendingPhoto:null };
+
+// Redimensiona/comprime a foto no próprio celular antes de enviar (rápido no 4G)
+function compressImage(file, maxDim=1280, quality=0.82){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width, h=img.height;
+      if(w>h && w>maxDim){h=Math.round(h*maxDim/w);w=maxDim;}
+      else if(h>=w && h>maxDim){w=Math.round(w*maxDim/h);h=maxDim;}
+      const c=document.createElement("canvas");c.width=w;c.height=h;
+      c.getContext("2d").drawImage(img,0,0,w,h);
+      c.toBlob(b=>resolve(b||file),"image/jpeg",quality);
+    };
+    img.onerror=()=>resolve(file);
+    img.src=URL.createObjectURL(file);
+  });
+}
+
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200);}
+function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function openModal(html){modal.innerHTML=html;overlay.classList.add("open");}
+function closeModal(){overlay.classList.remove("open");modal.innerHTML="";}
+overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal();});
+
+/* ---------- Navegação ---------- */
+$("#nav").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  document.querySelectorAll("#nav button").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");state.view=b.dataset.view;render();
+});
+$("#fab").addEventListener("click",()=>{
+  if(state.view==="catalogo")itemForm();
+  else if(state.view==="eventos")eventoForm();
+  else if(state.view==="contagens")novaContagem();
+});
+
+function render(){
+  if(!configured){renderSetup();return;}
+  if(state.view==="catalogo")renderCatalogo();
+  else if(state.view==="contagens")renderContagens();
+  else if(state.view==="eventos")renderEventos();
+}
+
+function renderSetup(){
+  main.innerHTML=`<div class="setup">
+    <h2>⚙️ Falta conectar ao banco de dados</h2>
+    <p>Este app precisa do endereço e da chave pública do seu projeto Supabase. Abra o arquivo
+    <code>inventario-lola.html</code> e substitua, no topo do script:</p>
+    <p><code>SUPABASE_URL</code> → a URL do projeto<br>
+       <code>SUPABASE_ANON</code> → a chave <b>anon / publishable</b></p>
+    <p class="mini">Ambos ficam em <b>Project Settings → API</b> no painel do Supabase.
+    Se eu (Claude) configurar para você, este aviso some sozinho.</p>
+  </div>`;
+}
+
+/* ============================================================
+   CATÁLOGO
+   ============================================================ */
+async function loadItems(){
+  const {data,error}=await sb.from("lola_loucas_itens").select("*").order("name");
+  if(error){toast("Erro ao carregar itens");console.error(error);return[];}
+  state.items=data||[];return state.items;
+}
+
+async function renderCatalogo(){
+  main.innerHTML=`<div class="empty">Carregando catálogo…</div>`;
+  await loadItems();
+  const suppliers=[...new Set(state.items.map(i=>i.supplier).filter(Boolean))].sort();
+  const colors=[...new Set(state.items.map(i=>i.color).filter(Boolean))].sort();
+  const q=state.q.toLowerCase();
+  const filtered=state.items.filter(i=>{
+    const hit=!q||[i.name,i.reference,i.supplier,i.color,i.category].some(v=>(v||"").toLowerCase().includes(q));
+    return hit && (!state.fSupplier||i.supplier===state.fSupplier) && (!state.fColor||i.color===state.fColor);
+  });
+  main.innerHTML=`
+    <div class="toolbar">
+      <input class="search" id="q" placeholder="Buscar nome, referência, fornecedor…" value="${esc(state.q)}">
+      <select id="fSupplier"><option value="">Todos fornecedores</option>
+        ${suppliers.map(s=>`<option ${s===state.fSupplier?"selected":""}>${esc(s)}</option>`).join("")}</select>
+      <select id="fColor"><option value="">Todas as cores</option>
+        ${colors.map(c=>`<option ${c===state.fColor?"selected":""}>${esc(c)}</option>`).join("")}</select>
+      <button class="btn" id="novoItem">+ Novo item</button>
+    </div>
+    ${filtered.length? `<div class="grid">${filtered.map(cardItem).join("")}</div>`
+      : `<div class="empty"><div>Nenhum item ${state.items.length?"encontrado":"cadastrado ainda"}.</div></div>`}
+    <p class="mini" style="margin-top:14px">${filtered.length} de ${state.items.length} itens · estoque total: ${state.items.reduce((a,i)=>a+(i.quantity||0),0)} peças</p>`;
+  $("#q").addEventListener("input",e=>{state.q=e.target.value;clearTimeout(window._qt);window._qt=setTimeout(renderCatalogo,250);});
+  $("#fSupplier").addEventListener("change",e=>{state.fSupplier=e.target.value;renderCatalogo();});
+  $("#fColor").addEventListener("change",e=>{state.fColor=e.target.value;renderCatalogo();});
+  $("#novoItem").addEventListener("click",()=>itemForm());
+  main.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>itemForm(b.dataset.edit)));
+  main.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>delItem(b.dataset.del)));
+}
+
+function cardItem(i){
+  return `<div class="card">
+    <div class="thumb">${i.photo_url?`<img src="${esc(i.photo_url)}" alt="">`:""}</div>
+    <div class="body">
+      <h3>${esc(i.name)}</h3>
+      <div class="meta">
+        ${i.reference?`<div><b>Ref:</b> ${esc(i.reference)}</div>`:""}
+        ${i.supplier?`<div><b>Fornecedor:</b> ${esc(i.supplier)}</div>`:""}
+      </div>
+      <div class="chips">
+        ${i.color?`<span class="chip">${esc(i.color)}</span>`:""}
+        ${i.category?`<span class="chip">${esc(i.category)}</span>`:""}
+      </div>
+      <div class="qty">${i.quantity||0} <small>em estoque</small></div>
+    </div>
+    <div class="card-actions">
+      <button class="btn ghost sm" data-edit="${i.id}">Editar</button>
+      <div class="spacer"></div>
+      <button class="btn ghost sm" data-del="${i.id}" title="Excluir">🗑</button>
+    </div>
+  </div>`;
+}
+
+function itemForm(id){
+  const it=id?state.items.find(x=>x.id===id):{};
+  state.pendingPhoto=null;
+  openModal(`
+    <h2>${id?"Editar item":"Novo item"}</h2>
+    <div class="field">
+      <label>Foto</label>
+      <img class="preview" id="f_preview" ${it.photo_url?`src="${esc(it.photo_url)}" style="display:block"`:""}>
+      <div class="photo-btns">
+        <button type="button" class="btn ghost sm" id="btnCam">📷 Tirar foto</button>
+        <button type="button" class="btn ghost sm" id="btnLib">🖼️ Galeria</button>
+        <span class="mini" id="photoStatus"></span>
+      </div>
+      <input type="file" id="f_photo_cam" accept="image/*" capture="environment" hidden>
+      <input type="file" id="f_photo_lib" accept="image/*" hidden>
+    </div>
+    <div class="field"><label>Nome *</label><input id="f_name" value="${esc(it.name)}" placeholder="Ex: Prato raso branco"></div>
+    <div class="field2">
+      <div class="field"><label>Referência</label><input id="f_reference" value="${esc(it.reference)}"></div>
+      <div class="field"><label>Fornecedor</label><input id="f_supplier" value="${esc(it.supplier)}"></div>
+    </div>
+    <div class="field2">
+      <div class="field"><label>Cor</label><input id="f_color" value="${esc(it.color)}"></div>
+      <div class="field"><label>Categoria</label><input id="f_category" value="${esc(it.category)}" placeholder="Louça, utensílio…"></div>
+    </div>
+    <div class="field2">
+      <div class="field"><label>Quantidade em estoque</label><input type="number" id="f_quantity" value="${it.quantity!=null?it.quantity:0}" min="0"></div>
+      <div class="field"><label>&nbsp;</label></div>
+    </div>
+    <div class="field"><label>Observações</label><textarea id="f_notes" rows="2">${esc(it.notes)}</textarea></div>
+    <div class="modal-actions">
+      <button class="btn" id="saveItem">Salvar</button>
+      <button class="btn ghost" id="cancel">Cancelar</button>
+    </div>`);
+  $("#cancel").addEventListener("click",closeModal);
+  const onPhoto=async e=>{
+    const f=e.target.files[0];if(!f)return;
+    $("#photoStatus").textContent="processando…";
+    const blob=await compressImage(f);
+    state.pendingPhoto=blob;
+    const p=$("#f_preview");p.src=URL.createObjectURL(blob);p.style.display="block";
+    $("#photoStatus").textContent="foto pronta ✓";
+  };
+  $("#btnCam").addEventListener("click",()=>$("#f_photo_cam").click());
+  $("#btnLib").addEventListener("click",()=>$("#f_photo_lib").click());
+  $("#f_photo_cam").addEventListener("change",onPhoto);
+  $("#f_photo_lib").addEventListener("change",onPhoto);
+  $("#saveItem").addEventListener("click",()=>saveItem(id));
+}
+
+async function saveItem(id){
+  const btn=$("#saveItem");btn.disabled=true;btn.textContent="Salvando…";
+  try{
+    const name=$("#f_name").value.trim();
+    if(!name){toast("Informe o nome");btn.disabled=false;btn.textContent="Salvar";return;}
+    let photo_url=id?(state.items.find(x=>x.id===id)||{}).photo_url:null;
+    const file=state.pendingPhoto;
+    if(file){
+      const path=`itens/${Date.now()}_${Math.random().toString(36).slice(2,7)}.jpg`;
+      const {error:upErr}=await sb.storage.from("loucas").upload(path,file,{upsert:true,contentType:"image/jpeg"});
+      if(upErr)throw upErr;
+      photo_url=sb.storage.from("loucas").getPublicUrl(path).data.publicUrl;
+    }
+    const payload={
+      name, reference:$("#f_reference").value.trim()||null,
+      supplier:$("#f_supplier").value.trim()||null, color:$("#f_color").value.trim()||null,
+      category:$("#f_category").value.trim()||null, quantity:parseInt($("#f_quantity").value||"0",10),
+      notes:$("#f_notes").value.trim()||null, photo_url, updated_at:new Date().toISOString()
+    };
+    const {error}= id? await sb.from("lola_loucas_itens").update(payload).eq("id",id)
+                      : await sb.from("lola_loucas_itens").insert(payload);
+    if(error)throw error;
+    closeModal();toast(id?"Item atualizado":"Item cadastrado");renderCatalogo();
+  }catch(err){console.error(err);toast("Erro ao salvar: "+(err.message||""));btn.disabled=false;btn.textContent="Salvar";}
+}
+
+async function delItem(id){
+  if(!confirm("Excluir este item do catálogo?"))return;
+  const {error}=await sb.from("lola_loucas_itens").delete().eq("id",id);
+  if(error){toast("Erro ao excluir");return;}
+  toast("Item excluído");renderCatalogo();
+}
+
+/* ============================================================
+   CONTAGENS (inventários com histórico)
+   ============================================================ */
+async function renderContagens(){
+  main.innerHTML=`<div class="empty">Carregando contagens…</div>`;
+  const {data:sessions}=await sb.from("lola_loucas_contagens").select("*").order("created_at",{ascending:false});
+  main.innerHTML=`
+    <div class="toolbar">
+      <div><h2 style="margin:0;font-size:18px">Contagens de inventário</h2>
+        <div class="mini">Inicie uma contagem, registre as quantidades e guarde o histórico.</div></div>
+      <div class="spacer"></div>
+      <button class="btn" id="novaContagem">+ Nova contagem</button>
+    </div>
+    ${(sessions&&sessions.length)? `<div class="list">${sessions.map(s=>`
+      <div class="listitem" data-open="${s.id}">
+        <div style="flex:1">
+          <div style="font-weight:700">${esc(s.name)}</div>
+          <div class="mini">Criada em ${new Date(s.created_at).toLocaleDateString("pt-BR")}${s.closed_at?` · fechada em ${new Date(s.closed_at).toLocaleDateString("pt-BR")}`:""}</div>
+        </div>
+        <span class="badge ${s.status}">${s.status}</span>
+      </div>`).join("")}</div>`
+      : `<div class="empty">Nenhuma contagem ainda. Crie a primeira!</div>`}`;
+  $("#novaContagem").addEventListener("click",novaContagem);
+  main.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",()=>abrirContagem(b.dataset.open)));
+}
+
+async function novaContagem(){
+  const def="Contagem "+new Date().toLocaleDateString("pt-BR");
+  const name=prompt("Nome da contagem:",def);if(name===null)return;
+  await loadItems();
+  const {data:sess,error}=await sb.from("lola_loucas_contagens").insert({name:name.trim()||def}).select().single();
+  if(error){toast("Erro ao criar");return;}
+  if(state.items.length){
+    const rows=state.items.map(i=>({session_id:sess.id,item_id:i.id,expected_quantity:i.quantity,counted_quantity:null}));
+    await sb.from("lola_loucas_contagem_itens").insert(rows);
+  }
+  toast("Contagem iniciada");abrirContagem(sess.id);
+}
+
+async function abrirContagem(id){
+  main.innerHTML=`<div class="empty">Abrindo contagem…</div>`;
+  const {data:sess}=await sb.from("lola_loucas_contagens").select("*").eq("id",id).single();
+  const {data:entries}=await sb.from("lola_loucas_contagem_itens")
+    .select("*, items:lola_loucas_itens(name,reference,supplier,photo_url)").eq("session_id",id);
+  entries.sort((a,b)=>(a.items?.name||"").localeCompare(b.items?.name||""));
+  const closed=sess.status==="fechada";
+  main.innerHTML=`
+    <button class="back" id="back">← Voltar</button>
+    <div class="row" style="margin-bottom:6px">
+      <h2 style="margin:0;font-size:19px">${esc(sess.name)}</h2>
+      <span class="badge ${sess.status}">${sess.status}</span>
+    </div>
+    <div class="mini" style="margin-bottom:14px">${closed?"Contagem fechada — somente leitura.":"Preencha a quantidade contada de cada item. Diferença = contado − esperado."}</div>
+    <div class="list" style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 14px;box-shadow:var(--shadow)">
+      ${entries.map(e=>countRow(e,closed)).join("")}
+    </div>
+    ${closed?"":`<div class="modal-actions" style="margin-top:16px">
+      <button class="btn" id="salvarContagem">Salvar contagem</button>
+      <button class="btn ghost" id="fecharContagem">Fechar e aplicar ao estoque</button>
+    </div>`}`;
+  $("#back").addEventListener("click",renderContagens);
+  if(!closed){
+    main.querySelectorAll("input[data-entry]").forEach(inp=>inp.addEventListener("input",()=>{
+      const exp=parseInt(inp.dataset.exp||"0",10);const val=inp.value===""?null:parseInt(inp.value,10);
+      const d=$(`#diff_${inp.dataset.entry}`);
+      if(val==null){d.textContent="—";d.className="diff zero";}
+      else{const diff=val-exp;d.textContent=(diff>0?"+":"")+diff;d.className="diff "+(diff>0?"pos":diff<0?"neg":"zero");}
+    }));
+    $("#salvarContagem").addEventListener("click",()=>salvarContagem(id,false));
+    $("#fecharContagem").addEventListener("click",()=>salvarContagem(id,true));
+  }
+}
+
+function countRow(e,closed){
+  const it=e.items||{};const exp=e.expected_quantity||0;const c=e.counted_quantity;
+  let diffTxt="—",diffCls="zero";
+  if(c!=null){const d=c-exp;diffTxt=(d>0?"+":"")+d;diffCls=d>0?"pos":d<0?"neg":"zero";}
+  return `<div class="count-row">
+    <div class="name"><div style="font-weight:600">${esc(it.name)}</div>
+      <div class="mini">${it.reference?esc(it.reference)+" · ":""}esperado: ${exp}</div></div>
+    ${closed? `<div style="font-weight:700">${c!=null?c:"—"}</div>`
+            : `<input type="number" min="0" data-entry="${e.id}" data-exp="${exp}" value="${c!=null?c:""}" placeholder="${exp}">`}
+    <div class="diff ${diffCls}" id="diff_${e.id}">${diffTxt}</div>
+  </div>`;
+}
+
+async function salvarContagem(id,fechar){
+  const inputs=[...main.querySelectorAll("input[data-entry]")];
+  for(const inp of inputs){
+    const val=inp.value===""?null:parseInt(inp.value,10);
+    await sb.from("lola_loucas_contagem_itens").update({counted_quantity:val}).eq("id",inp.dataset.entry);
+  }
+  if(fechar){
+    if(!confirm("Fechar a contagem e atualizar o estoque com as quantidades contadas?"))return;
+    const {data:entries}=await sb.from("lola_loucas_contagem_itens").select("item_id,counted_quantity").eq("session_id",id);
+    for(const e of entries){
+      if(e.counted_quantity!=null)
+        await sb.from("lola_loucas_itens").update({quantity:e.counted_quantity,updated_at:new Date().toISOString()}).eq("id",e.item_id);
+    }
+    await sb.from("lola_loucas_contagens").update({status:"fechada",closed_at:new Date().toISOString()}).eq("id",id);
+    toast("Contagem fechada e estoque atualizado");renderContagens();
+  }else{toast("Contagem salva");}
+}
+
+/* ============================================================
+   EVENTOS (saída e retorno de itens)
+   ============================================================ */
+async function renderEventos(){
+  main.innerHTML=`<div class="empty">Carregando eventos…</div>`;
+  const {data:events}=await sb.from("lola_loucas_eventos").select("*").order("event_date",{ascending:false,nullsFirst:false});
+  main.innerHTML=`
+    <div class="toolbar">
+      <div><h2 style="margin:0;font-size:18px">Eventos</h2>
+        <div class="mini">Monte a lista do evento, registre a origem e dê check no retorno.</div></div>
+      <div class="spacer"></div>
+      <button class="btn" id="novoEvento">+ Novo evento</button>
+    </div>
+    ${(events&&events.length)? `<div class="list">${events.map(ev=>`
+      <div class="listitem" data-open="${ev.id}">
+        <div style="flex:1">
+          <div style="font-weight:700">${esc(ev.name)}</div>
+          <div class="mini">${ev.event_date?new Date(ev.event_date+"T00:00").toLocaleDateString("pt-BR"):"sem data"}${ev.location?" · "+esc(ev.location):""}</div>
+        </div>
+        <span class="badge ${ev.status}">${ev.status.replace("_"," ")}</span>
+      </div>`).join("")}</div>`
+      : `<div class="empty">Nenhum evento ainda. Clique em “Novo evento”.</div>`}`;
+  $("#novoEvento").addEventListener("click",()=>eventoForm());
+  main.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",()=>abrirEvento(b.dataset.open)));
+}
+
+function eventoForm(){
+  openModal(`
+    <h2>Novo evento</h2>
+    <div class="field"><label>Nome do evento *</label><input id="e_name" placeholder="Ex: Casamento Marina & João"></div>
+    <div class="field2">
+      <div class="field"><label>Data</label><input type="date" id="e_date"></div>
+      <div class="field"><label>Local</label><input id="e_location" placeholder="Salão / endereço"></div>
+    </div>
+    <div class="field"><label>Observações</label><textarea id="e_notes" rows="2"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn" id="saveEvento">Criar evento</button>
+      <button class="btn ghost" id="cancel">Cancelar</button>
+    </div>`);
+  $("#cancel").addEventListener("click",closeModal);
+  $("#saveEvento").addEventListener("click",async()=>{
+    const name=$("#e_name").value.trim();if(!name){toast("Informe o nome");return;}
+    const {data,error}=await sb.from("lola_loucas_eventos").insert({
+      name, event_date:$("#e_date").value||null, location:$("#e_location").value.trim()||null,
+      notes:$("#e_notes").value.trim()||null
+    }).select().single();
+    if(error){toast("Erro ao criar");return;}
+    closeModal();toast("Evento criado");abrirEvento(data.id);
+  });
+}
+
+async function abrirEvento(id){
+  main.innerHTML=`<div class="empty">Abrindo evento…</div>`;
+  const {data:ev}=await sb.from("lola_loucas_eventos").select("*").eq("id",id).single();
+  const {data:eitems}=await sb.from("lola_loucas_evento_itens")
+    .select("*, items:lola_loucas_itens(name,reference,photo_url)").eq("event_id",id).order("created_at");
+  const total=(eitems||[]).reduce((a,e)=>a+(e.quantity||0),0);
+  const devolvidos=(eitems||[]).filter(e=>e.returned).length;
+  main.innerHTML=`
+    <button class="back" id="back">← Voltar</button>
+    <div class="row" style="margin-bottom:4px">
+      <h2 style="margin:0;font-size:19px">${esc(ev.name)}</h2>
+      <span class="badge ${ev.status}" id="evStatus">${ev.status.replace("_"," ")}</span>
+    </div>
+    <div class="mini" style="margin-bottom:14px">
+      ${ev.event_date?new Date(ev.event_date+"T00:00").toLocaleDateString("pt-BR"):"sem data"}${ev.location?" · "+esc(ev.location):""}
+      · ${eitems.length} itens · ${total} peças · ${devolvidos}/${eitems.length} devolvidos
+    </div>
+    <div class="toolbar">
+      <button class="btn sm" id="addItemEv
