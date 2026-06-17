@@ -56,6 +56,8 @@
   .meta b{color:var(--ink);font-weight:600}
   .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
   .chip{background:var(--chip);border-radius:999px;padding:3px 9px;font-size:11.5px;color:var(--brand-d);font-weight:600}
+  .chip.unidade{background:var(--brand);color:#fff}
+  .chip.semuni{background:#f0eae2;color:#a89a86}
   .qty{display:inline-flex;align-items:center;gap:8px;margin-top:10px;font-weight:800;font-size:18px;color:var(--brand)}
   .qty small{font-weight:600;font-size:11px;color:var(--muted)}
   .card-actions{display:flex;gap:6px;padding:0 12px 12px}
@@ -159,7 +161,8 @@ const $ = (s,el=document)=>el.querySelector(s);
 const main = $("#main");
 const overlay = $("#overlay");
 const modal = $("#modal");
-let state = { view:"catalogo", items:[], q:"", fSupplier:"", fColor:"", pendingPhoto:null };
+let state = { view:"catalogo", items:[], q:"", fSupplier:"", fColor:"", fUnidade:"", pendingPhoto:null };
+const UNIDADES = ["Lola CCMQ","Central","Lola MAC"];
 
 // Redimensiona/comprime a foto no próprio celular antes de enviar (rápido no 4G)
 function compressImage(file, maxDim=1280, quality=0.82){
@@ -233,7 +236,7 @@ async function renderCatalogo(){
   const q=state.q.toLowerCase();
   const filtered=state.items.filter(i=>{
     const hit=!q||[i.name,i.reference,i.supplier,i.color,i.category].some(v=>(v||"").toLowerCase().includes(q));
-    return hit && (!state.fSupplier||i.supplier===state.fSupplier) && (!state.fColor||i.color===state.fColor);
+    return hit && (!state.fSupplier||i.supplier===state.fSupplier) && (!state.fColor||i.color===state.fColor) && (!state.fUnidade||i.unidade===state.fUnidade);
   });
   main.innerHTML=`
     <div class="toolbar">
@@ -242,6 +245,8 @@ async function renderCatalogo(){
         ${suppliers.map(s=>`<option ${s===state.fSupplier?"selected":""}>${esc(s)}</option>`).join("")}</select>
       <select id="fColor"><option value="">Todas as cores</option>
         ${colors.map(c=>`<option ${c===state.fColor?"selected":""}>${esc(c)}</option>`).join("")}</select>
+      <select id="fUnidade"><option value="">Todas as unidades</option>
+        ${UNIDADES.map(u=>`<option ${u===state.fUnidade?"selected":""}>${esc(u)}</option>`).join("")}</select>
       <button class="btn" id="novoItem">+ Novo item</button>
     </div>
     ${filtered.length? `<div class="grid">${filtered.map(cardItem).join("")}</div>`
@@ -250,6 +255,7 @@ async function renderCatalogo(){
   $("#q").addEventListener("input",e=>{state.q=e.target.value;clearTimeout(window._qt);window._qt=setTimeout(renderCatalogo,250);});
   $("#fSupplier").addEventListener("change",e=>{state.fSupplier=e.target.value;renderCatalogo();});
   $("#fColor").addEventListener("change",e=>{state.fColor=e.target.value;renderCatalogo();});
+  $("#fUnidade").addEventListener("change",e=>{state.fUnidade=e.target.value;renderCatalogo();});
   $("#novoItem").addEventListener("click",()=>itemForm());
   main.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>itemForm(b.dataset.edit)));
   main.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>delItem(b.dataset.del)));
@@ -265,6 +271,7 @@ function cardItem(i){
         ${i.supplier?`<div><b>Fornecedor:</b> ${esc(i.supplier)}</div>`:""}
       </div>
       <div class="chips">
+        ${i.unidade?`<span class="chip unidade">${esc(i.unidade)}</span>`:`<span class="chip semuni">sem unidade</span>`}
         ${i.color?`<span class="chip">${esc(i.color)}</span>`:""}
         ${i.category?`<span class="chip">${esc(i.category)}</span>`:""}
       </div>
@@ -295,6 +302,11 @@ function itemForm(id){
       <input type="file" id="f_photo_lib" accept="image/*" hidden>
     </div>
     <div class="field"><label>Nome *</label><input id="f_name" value="${esc(it.name)}" placeholder="Ex: Prato raso branco"></div>
+    <div class="field"><label>Unidade *</label>
+      <select id="f_unidade">
+        <option value="">Selecione…</option>
+        ${UNIDADES.map(u=>`<option ${it.unidade===u?"selected":""}>${esc(u)}</option>`).join("")}
+      </select></div>
     <div class="field2">
       <div class="field"><label>Referência</label><input id="f_reference" value="${esc(it.reference)}"></div>
       <div class="field"><label>Fornecedor</label><input id="f_supplier" value="${esc(it.supplier)}"></div>
@@ -333,6 +345,8 @@ async function saveItem(id){
   try{
     const name=$("#f_name").value.trim();
     if(!name){toast("Informe o nome");btn.disabled=false;btn.textContent="Salvar";return;}
+    const unidade=$("#f_unidade").value;
+    if(!unidade){toast("Selecione a unidade (Lola CCMQ, Central ou Lola MAC)");btn.disabled=false;btn.textContent="Salvar";return;}
     let photo_url=id?(state.items.find(x=>x.id===id)||{}).photo_url:null;
     const file=state.pendingPhoto;
     if(file){
@@ -342,7 +356,7 @@ async function saveItem(id){
       photo_url=sb.storage.from("loucas").getPublicUrl(path).data.publicUrl;
     }
     const payload={
-      name, reference:$("#f_reference").value.trim()||null,
+      name, unidade, reference:$("#f_reference").value.trim()||null,
       supplier:$("#f_supplier").value.trim()||null, color:$("#f_color").value.trim()||null,
       category:$("#f_category").value.trim()||null, quantity:parseInt($("#f_quantity").value||"0",10),
       notes:$("#f_notes").value.trim()||null, photo_url, updated_at:new Date().toISOString()
