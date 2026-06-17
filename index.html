@@ -534,4 +534,76 @@ async function abrirEvento(id){
       · ${eitems.length} itens · ${total} peças · ${devolvidos}/${eitems.length} devolvidos
     </div>
     <div class="toolbar">
-      <button class="btn sm" id="addItemEv
+      <button class="btn sm" id="addItemEvt">+ Adicionar item</button>
+      <div class="spacer"></div>
+      <select id="evStatusSel">
+        ${["planejado","em_andamento","concluido"].map(s=>`<option value="${s}" ${ev.status===s?"selected":""}>${s.replace("_"," ")}</option>`).join("")}
+      </select>
+    </div>
+    ${eitems.length? `<div class="list" style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 14px;box-shadow:var(--shadow)">
+      ${eitems.map(evtRow).join("")}</div>`
+      : `<div class="empty">Nenhum item neste evento ainda.</div>`}`;
+  $("#back").addEventListener("click",renderEventos);
+  $("#addItemEvt").addEventListener("click",()=>addItemEvento(id));
+  $("#evStatusSel").addEventListener("change",async e=>{
+    await sb.from("lola_loucas_eventos").update({status:e.target.value}).eq("id",id);
+    const b=$("#evStatus");b.textContent=e.target.value.replace("_"," ");b.className="badge "+e.target.value;
+    toast("Status atualizado");
+  });
+  main.querySelectorAll("[data-ret]").forEach(c=>c.addEventListener("change",()=>toggleReturn(c.dataset.ret,c.checked,id)));
+  main.querySelectorAll("[data-delevt]").forEach(b=>b.addEventListener("click",()=>delEventItem(b.dataset.delevt,id)));
+}
+
+function evtRow(e){
+  const it=e.items||{};
+  return `<div class="evt-row ${e.returned?"returned":""}">
+    <div style="flex:1">
+      <div style="font-weight:600">${esc(it.name)} <span class="mini">× ${e.quantity}</span></div>
+      <div class="mini">${e.origin?"Origem: "+esc(e.origin):it.reference?esc(it.reference):""}</div>
+    </div>
+    <label class="checkwrap"><input type="checkbox" data-ret="${e.id}" ${e.returned?"checked":""}> devolvido</label>
+    <button class="btn ghost sm" data-delevt="${e.id}" title="Remover">🗑</button>
+  </div>`;
+}
+
+async function addItemEvento(eventId){
+  await loadItems();
+  if(!state.items.length){toast("Cadastre itens no catálogo primeiro");return;}
+  openModal(`
+    <h2>Adicionar item ao evento</h2>
+    <div class="field"><label>Item *</label>
+      <select id="ei_item">${state.items.map(i=>`<option value="${i.id}">${esc(i.name)}${i.color?" · "+esc(i.color):""} (estoque: ${i.quantity})</option>`).join("")}</select></div>
+    <div class="field2">
+      <div class="field"><label>Quantidade *</label><input type="number" id="ei_qty" value="1" min="1"></div>
+      <div class="field"><label>Origem (de onde saiu)</label><input id="ei_origin" placeholder="Depósito, loja…"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="saveEi">Adicionar</button>
+      <button class="btn ghost" id="cancel">Cancelar</button>
+    </div>`);
+  $("#cancel").addEventListener("click",closeModal);
+  $("#saveEi").addEventListener("click",async()=>{
+    const item_id=$("#ei_item").value;const quantity=parseInt($("#ei_qty").value||"1",10);
+    const {error}=await sb.from("lola_loucas_evento_itens").insert({event_id:eventId,item_id,quantity,origin:$("#ei_origin").value.trim()||null});
+    if(error){toast("Erro ao adicionar");return;}
+    closeModal();toast("Item adicionado");abrirEvento(eventId);
+  });
+}
+
+async function toggleReturn(eiId,checked,eventId){
+  await sb.from("lola_loucas_evento_itens").update({returned:checked,returned_at:checked?new Date().toISOString():null}).eq("id",eiId);
+  toast(checked?"Marcado como devolvido":"Devolução desfeita");
+  abrirEvento(eventId);
+}
+
+async function delEventItem(eiId,eventId){
+  if(!confirm("Remover este item do evento?"))return;
+  await sb.from("lola_loucas_evento_itens").delete().eq("id",eiId);
+  toast("Item removido");abrirEvento(eventId);
+}
+
+/* ---------- start ---------- */
+render();
+</script>
+</body>
+</html>
