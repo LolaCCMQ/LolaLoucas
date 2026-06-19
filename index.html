@@ -21,7 +21,7 @@
        background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
   header{position:sticky;top:0;z-index:30;background:#fff;
          border-bottom:2px solid var(--brand)}
-  .bar{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:14px}
+  .bar{max-width:1500px;margin:0;padding:12px 20px;display:flex;align-items:center;gap:14px}
   .logo{display:flex;align-items:center;gap:11px;line-height:1}
   .logo-svg{height:40px;width:auto;display:block}
   .logo span{font-family:Nunito,sans-serif;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.2px;
@@ -32,7 +32,7 @@
   nav button:hover{background:var(--chip)}
   nav button.active{background:var(--brand);color:#fff}
   main h2{font-family:var(--serif)}
-  main{max-width:1100px;margin:0 auto;padding:18px 16px 80px}
+  main{max-width:1500px;margin:0;padding:16px 20px 80px}
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
   input,select,textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);
         border-radius:10px;padding:10px 12px;outline:none}
@@ -186,7 +186,7 @@ const $ = (s,el=document)=>el.querySelector(s);
 const main = $("#main");
 const overlay = $("#overlay");
 const modal = $("#modal");
-let state = { view:"catalogo", items:[], q:"", fSupplier:"", fColor:"", fUnidade:"", fLocal:"", pendingPhoto:null };
+let state = { view:"catalogo", items:[], q:"", fSupplier:"", fColor:"", fUnidade:"", fLocal:"", fCategoria:"", pendingPhoto:null };
 const UNIDADES = ["Lola CCMQ","Central","Lola MAC"];
 const UNIDADE_COR = {"Lola CCMQ":"#A8272A","Central":"#2D6A4F","Lola MAC":"#1A5276"};
 const LOCAIS = ["Em uso MAC","Em uso Lola","Em uso Central","Depósito Central","Depósito MAC","Calabouço","Depósito Bebidas","Escritório"];
@@ -260,10 +260,11 @@ async function renderCatalogo(){
   await loadItems();
   const suppliers=[...new Set(state.items.map(i=>i.supplier).filter(Boolean))].sort();
   const colors=[...new Set(state.items.map(i=>i.color).filter(Boolean))].sort();
+  const categorias=[...new Set(state.items.map(i=>i.category).filter(Boolean))].sort();
   const q=state.q.toLowerCase();
   const filtered=state.items.filter(i=>{
-    const hit=!q||[i.name,i.reference,i.supplier,i.color,i.category,i.local,i.unidade].some(v=>(v||"").toLowerCase().includes(q));
-    return hit && (!state.fSupplier||i.supplier===state.fSupplier) && (!state.fColor||i.color===state.fColor) && (!state.fUnidade||i.unidade===state.fUnidade) && (!state.fLocal||i.local===state.fLocal);
+    const hit=!q||[i.name,i.reference,i.supplier,i.color,i.category,i.local,i.unidade,i.medida].some(v=>(v||"").toLowerCase().includes(q));
+    return hit && (!state.fSupplier||i.supplier===state.fSupplier) && (!state.fColor||i.color===state.fColor) && (!state.fUnidade||i.unidade===state.fUnidade) && (!state.fLocal||i.local===state.fLocal) && (!state.fCategoria||i.category===state.fCategoria);
   });
   main.innerHTML=`
     <div class="toolbar">
@@ -276,9 +277,12 @@ async function renderCatalogo(){
         ${UNIDADES.map(u=>`<option ${u===state.fUnidade?"selected":""}>${esc(u)}</option>`).join("")}</select>
       <select id="fLocal"><option value="">Todos os locais</option>
         ${LOCAIS.map(l=>`<option ${l===state.fLocal?"selected":""}>${esc(l)}</option>`).join("")}</select>
+      <select id="fCategoria"><option value="">Todas as categorias</option>
+        ${categorias.map(c=>`<option ${c===state.fCategoria?"selected":""}>${esc(c)}</option>`).join("")}</select>
+      <button class="btn ghost" id="imprimir">🖨️ Imprimir contagem</button>
       <button class="btn" id="novoItem">+ Novo item</button>
     </div>
-    ${filtered.length? `<div class="tablewrap"><table class="grid-table"><thead><tr><th></th><th>Nome</th><th>Qtd</th><th>Local</th><th>Unidade</th><th>Fornecedor</th><th>Ref</th><th>Cor</th><th></th></tr></thead><tbody>${filtered.map(rowItem).join("")}</tbody></table></div>`
+    ${filtered.length? `<div class="tablewrap"><table class="grid-table"><thead><tr><th></th><th>Nome</th><th>Medida</th><th>Qtd</th><th>Local</th><th>Unidade</th><th>Categoria</th><th>Fornecedor</th><th>Ref</th><th>Cor</th><th></th></tr></thead><tbody>${filtered.map(rowItem).join("")}</tbody></table></div>`
       : `<div class="empty"><div>Nenhum item ${state.items.length?"encontrado":"cadastrado ainda"}.</div></div>`}
     <p class="mini" style="margin-top:14px">${filtered.length} de ${state.items.length} itens · estoque total: ${state.items.reduce((a,i)=>a+(i.quantity||0),0)} peças</p>`;
   $("#q").addEventListener("input",e=>{state.q=e.target.value;clearTimeout(window._qt);window._qt=setTimeout(renderCatalogo,250);});
@@ -286,6 +290,8 @@ async function renderCatalogo(){
   $("#fColor").addEventListener("change",e=>{state.fColor=e.target.value;renderCatalogo();});
   $("#fUnidade").addEventListener("change",e=>{state.fUnidade=e.target.value;renderCatalogo();});
   $("#fLocal").addEventListener("change",e=>{state.fLocal=e.target.value;renderCatalogo();});
+  $("#fCategoria").addEventListener("change",e=>{state.fCategoria=e.target.value;renderCatalogo();});
+  $("#imprimir").addEventListener("click",()=>imprimirContagem(filtered));
   $("#novoItem").addEventListener("click",()=>itemForm());
   main.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>itemForm(b.dataset.edit)));
   main.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>delItem(b.dataset.del)));
@@ -295,9 +301,11 @@ function rowItem(i){
   return `<tr>
     <td>${i.photo_url?`<img class="thumb-sm" src="${esc(i.photo_url)}" alt="">`:`<span class="thumb-sm noimg"></span>`}</td>
     <td class="tcell-nome">${esc(i.name)}</td>
+    <td>${esc(i.medida||"")}</td>
     <td class="tcell-qtd ${(i.estoque_minimo!=null && (i.quantity||0) < i.estoque_minimo)?'baixo':''}">${i.quantity||0}${(i.estoque_minimo!=null)?`<div class="minlbl">${((i.quantity||0)<i.estoque_minimo)?"⚠ ":""}mín ${i.estoque_minimo}</div>`:""}</td>
     <td>${i.local?`<span class="chip local">${esc(i.local)}</span>`:`<span class="chip semuni">—</span>`}</td>
     <td>${i.unidade?`<span class="chip unidade" style="background:${UNIDADE_COR[i.unidade]||'var(--brand)'}">${esc(i.unidade)}</span>`:`<span class="chip semuni">—</span>`}</td>
+    <td>${i.category?`<span class="chip">${esc(i.category)}</span>`:`<span class="chip semuni">—</span>`}</td>
     <td>${esc(i.supplier||"")}</td>
     <td>${esc(i.reference||"")}</td>
     <td>${i.color?`<span class="chip">${esc(i.color)}</span>`:""}</td>
@@ -329,6 +337,7 @@ function itemForm(id){
       </div>
     </div>
     <div class="field"><label>Nome *</label><input id="f_name" value="${esc(it.name)}" placeholder="Ex: Prato raso branco"></div>
+    <div class="field"><label>Medida / tamanho</label><input id="f_medida" value="${esc(it.medida)}" placeholder="ex: 300ml, Grande, 25cm, unidade"></div>
     <div class="field2">
       <div class="field"><label>Unidade *</label>
         <select id="f_unidade">
@@ -426,7 +435,7 @@ async function saveItem(id){
       photo_url=sb.storage.from("loucas").getPublicUrl(path).data.publicUrl;
     }
     const payload={
-      name, unidade, local, reference:$("#f_reference").value.trim()||null,
+      name, unidade, local, medida:$("#f_medida").value.trim()||null, reference:$("#f_reference").value.trim()||null,
       supplier:$("#f_supplier").value.trim()||null, color:$("#f_color").value.trim()||null,
       category:$("#f_category").value.trim()||null, quantity:parseInt($("#f_quantity").value||"0",10),
       estoque_minimo:$("#f_min").value!==""?parseInt($("#f_min").value,10):null,
@@ -444,6 +453,17 @@ async function delItem(id){
   const {error}=await sb.from("lola_loucas_itens").delete().eq("id",id);
   if(error){toast("Erro ao excluir");return;}
   toast("Item excluído");renderCatalogo();
+}
+
+function imprimirContagem(items){
+  const cat=state.fCategoria||"Todas as categorias";
+  const hoje=new Date().toLocaleDateString("pt-BR");
+  const linhas=items.map(i=>`<tr><td>${esc(i.name)}</td><td>${esc(i.medida||"")}</td><td>${esc(i.local||"")}</td><td>${esc(i.unidade||"")}</td><td>${esc(i.category||"")}</td><td class="c">${i.quantity||0}</td><td class="c"></td><td class="c"></td></tr>`).join("");
+  const css="*{font-family:Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}h1{font-size:18px;margin:0 0 2px;color:#A8272A}.sub{font-size:12px;color:#444;margin-bottom:12px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #888;padding:5px 7px;text-align:left}th{background:#f1ebe2}td.c{text-align:center}tbody tr td{height:24px}.foot{margin-top:22px;font-size:12px}@page{margin:12mm}";
+  const html=`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Contagem - ${esc(cat)}</title><style>${css}</style></head><body><h1>Contagem · Louças e Utensílios</h1><div class="sub">Categoria: <b>${esc(cat)}</b> · ${items.length} itens · ${hoje}</div><table><thead><tr><th>Item</th><th>Medida</th><th>Local</th><th>Unidade</th><th>Categoria</th><th>Sistema</th><th>Contado</th><th>Dif.</th></tr></thead><tbody>${linhas}</tbody></table><div class="foot">Conferido por: __________________________&nbsp;&nbsp;&nbsp; Assinatura: __________________________</div><scr`+`ipt>window.onload=function(){setTimeout(function(){window.print();},250);};</scr`+`ipt></body></html>`;
+  const w=window.open("","_blank");
+  if(!w){toast("Permita pop-ups para imprimir a contagem");return;}
+  w.document.open();w.document.write(html);w.document.close();
 }
 
 async function loadMov(id){
