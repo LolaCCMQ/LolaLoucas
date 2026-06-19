@@ -72,6 +72,17 @@
   .tcell-acoes{text-align:right}
   .iconbtn{background:var(--chip);border:0;border-radius:8px;padding:6px 9px;cursor:pointer;font-size:14px;margin-left:5px}
   .iconbtn:hover{background:#e7ddd0}
+  .tcell-qtd .minlbl{font-size:10px;font-weight:600;color:var(--muted);margin-top:1px}
+  .tcell-qtd.baixo{color:#c2453f}
+  .tcell-qtd.baixo .minlbl{color:#c2453f}
+  .movlist{display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto;margin:4px 0 10px}
+  .movrow{font-size:12.5px;padding:6px 9px;background:var(--bg);border:1px solid var(--line);border-radius:8px;line-height:1.5}
+  .movtag{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--chip);color:var(--brand-d)}
+  .movtag.tipo-quebra{background:#fbe9e7;color:#c2453f}
+  .movtag.tipo-entrada{background:#e8f4ee;color:#2D6A4F}
+  .movtag.tipo-transferncia{background:#eaf0f6;color:#1A5276}
+  .movtag.tipo-sada{background:#f3ede4;color:#8a6d52}
+  .movform{border-top:1px dashed var(--line);padding-top:8px}
   .qty{display:inline-flex;align-items:center;gap:8px;margin-top:10px;font-weight:800;font-size:18px;color:var(--brand)}
   .qty small{font-weight:600;font-size:11px;color:var(--muted)}
   .card-actions{display:flex;gap:6px;padding:0 12px 12px}
@@ -284,7 +295,7 @@ function rowItem(i){
   return `<tr>
     <td>${i.photo_url?`<img class="thumb-sm" src="${esc(i.photo_url)}" alt="">`:`<span class="thumb-sm noimg"></span>`}</td>
     <td class="tcell-nome">${esc(i.name)}</td>
-    <td class="tcell-qtd">${i.quantity||0}</td>
+    <td class="tcell-qtd ${(i.estoque_minimo!=null && (i.quantity||0) < i.estoque_minimo)?'baixo':''}">${i.quantity||0}${(i.estoque_minimo!=null)?`<div class="minlbl">${((i.quantity||0)<i.estoque_minimo)?"⚠ ":""}mín ${i.estoque_minimo}</div>`:""}</td>
     <td>${i.local?`<span class="chip local">${esc(i.local)}</span>`:`<span class="chip semuni">—</span>`}</td>
     <td>${i.unidade?`<span class="chip unidade" style="background:${UNIDADE_COR[i.unidade]||'var(--brand)'}">${esc(i.unidade)}</span>`:`<span class="chip semuni">—</span>`}</td>
     <td>${esc(i.supplier||"")}</td>
@@ -340,9 +351,27 @@ function itemForm(id){
     </div>
     <div class="field2">
       <div class="field"><label>Quantidade em estoque</label><input type="number" id="f_quantity" value="${it.quantity!=null?it.quantity:0}" min="0"></div>
-      <div class="field"><label>&nbsp;</label></div>
+      <div class="field"><label>Estoque mínimo</label><input type="number" id="f_min" value="${it.estoque_minimo!=null?it.estoque_minimo:''}" min="0" placeholder="opcional"></div>
     </div>
     <div class="field"><label>Observações</label><textarea id="f_notes" rows="2">${esc(it.notes)}</textarea></div>
+    ${id?`
+    <div class="field" style="border-top:1px solid var(--line);padding-top:12px;margin-top:4px">
+      <label>Movimentações / histórico</label>
+      <div id="movList" class="movlist"><div class="mini">carregando…</div></div>
+      <div class="movform">
+        <div class="field2">
+          <div class="field"><label>Tipo</label><select id="m_tipo"><option>Transferência</option><option>Saída</option><option>Entrada</option><option>Quebra</option></select></div>
+          <div class="field"><label>Quantidade</label><input type="number" id="m_qtd" min="1" value="1"></div>
+        </div>
+        <div class="field2">
+          <div class="field"><label>Para onde (destino)</label><select id="m_destino"><option value="">—</option><optgroup label="Unidades">${UNIDADES.map(u=>`<option>${esc(u)}</option>`).join("")}</optgroup><optgroup label="Locais">${LOCAIS.map(l=>`<option>${esc(l)}</option>`).join("")}</optgroup></select></div>
+          <div class="field"><label>Data</label><input type="date" id="m_data" value="${new Date().toISOString().slice(0,10)}"></div>
+        </div>
+        <div class="field"><label>Observação</label><input id="m_obs" placeholder="ex: enviado para evento"></div>
+        <label class="checkwrap" style="margin-top:2px"><input type="checkbox" id="m_baixa" checked> Atualizar a quantidade em estoque deste item</label>
+        <button type="button" class="btn ghost sm" id="m_add" style="margin-top:8px">+ Registrar movimentação</button>
+      </div>
+    </div>`:""}
     <div class="modal-actions">
       <button class="btn" id="saveItem">Salvar</button>
       <button class="btn ghost" id="cancel">Cancelar</button>
@@ -376,6 +405,7 @@ function itemForm(id){
   $("#f_photo_cam").addEventListener("change",onPhoto);
   $("#f_photo_lib").addEventListener("change",onPhoto);
   $("#saveItem").addEventListener("click",()=>saveItem(id));
+  if(id){ loadMov(id); $("#m_add").addEventListener("click",()=>registrarMov(id)); }
 }
 
 async function saveItem(id){
@@ -399,6 +429,7 @@ async function saveItem(id){
       name, unidade, local, reference:$("#f_reference").value.trim()||null,
       supplier:$("#f_supplier").value.trim()||null, color:$("#f_color").value.trim()||null,
       category:$("#f_category").value.trim()||null, quantity:parseInt($("#f_quantity").value||"0",10),
+      estoque_minimo:$("#f_min").value!==""?parseInt($("#f_min").value,10):null,
       notes:$("#f_notes").value.trim()||null, photo_url, updated_at:new Date().toISOString()
     };
     const {error}= id? await sb.from("lola_loucas_itens").update(payload).eq("id",id)
@@ -413,6 +444,32 @@ async function delItem(id){
   const {error}=await sb.from("lola_loucas_itens").delete().eq("id",id);
   if(error){toast("Erro ao excluir");return;}
   toast("Item excluído");renderCatalogo();
+}
+
+async function loadMov(id){
+  const el=$("#movList"); if(!el)return;
+  const {data}=await sb.from("lola_loucas_movimentacoes").select("*").eq("item_id",id).order("data",{ascending:false}).order("created_at",{ascending:false});
+  if(!data||!data.length){el.innerHTML='<div class="mini">Nenhuma movimentação registrada ainda.</div>';return;}
+  el.innerHTML=data.map(m=>{
+    const cls=(m.tipo||'').toLowerCase().replace(/[^a-z]/g,'');
+    return `<div class="movrow"><span class="movtag tipo-${cls}">${esc(m.tipo||'')}</span> <b>${m.quantidade} un</b> ${m.destino?'→ '+esc(m.destino):''} <span class="mini">· ${m.data?new Date(m.data+"T00:00").toLocaleDateString("pt-BR"):''}${m.obs?' · '+esc(m.obs):''}</span></div>`;
+  }).join("");
+}
+
+async function registrarMov(id){
+  const tipo=$("#m_tipo").value; const q=parseInt($("#m_qtd").value||"0",10);
+  if(!q||q<1){toast("Informe a quantidade da movimentação");return;}
+  const mov={item_id:id,tipo,quantidade:q,destino:$("#m_destino").value||null,data:$("#m_data").value||new Date().toISOString().slice(0,10),obs:$("#m_obs").value.trim()||null};
+  const {error}=await sb.from("lola_loucas_movimentacoes").insert(mov);
+  if(error){toast("Erro ao registrar: "+(error.message||""));return;}
+  if($("#m_baixa")&&$("#m_baixa").checked){
+    const cur=parseInt($("#f_quantity").value||"0",10);
+    const novo=tipo==="Entrada"?cur+q:Math.max(0,cur-q);
+    $("#f_quantity").value=novo;
+    await sb.from("lola_loucas_itens").update({quantity:novo,updated_at:new Date().toISOString()}).eq("id",id);
+  }
+  $("#m_obs").value=""; $("#m_qtd").value="1";
+  toast("Movimentação registrada"); loadMov(id); renderCatalogo();
 }
 
 /* ============================================================
