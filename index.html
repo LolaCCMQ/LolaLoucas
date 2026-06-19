@@ -58,6 +58,20 @@
   .chip{background:var(--chip);border-radius:999px;padding:3px 9px;font-size:11.5px;color:var(--brand-d);font-weight:600}
   .chip.unidade{background:var(--brand);color:#fff}
   .chip.semuni{background:#f0eae2;color:#a89a86}
+  .chip.local{background:#eef0f4;color:#3a4a5a}
+  .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:var(--shadow)}
+  .grid-table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .grid-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--brand-d);font-weight:800;padding:11px 12px;border-bottom:2px solid var(--line);white-space:nowrap;background:var(--chip)}
+  .grid-table td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+  .grid-table tbody tr:last-child td{border-bottom:0}
+  .grid-table tbody tr:hover{background:var(--warm)}
+  .tcell-nome{font-weight:700;white-space:normal;min-width:150px}
+  .tcell-qtd{font-weight:800;color:var(--brand);text-align:center}
+  .thumb-sm{width:42px;height:42px;border-radius:8px;object-fit:cover;display:block;background:var(--warm)}
+  .thumb-sm.noimg{display:inline-block;background:var(--warm)}
+  .tcell-acoes{text-align:right}
+  .iconbtn{background:var(--chip);border:0;border-radius:8px;padding:6px 9px;cursor:pointer;font-size:14px;margin-left:5px}
+  .iconbtn:hover{background:#e7ddd0}
   .qty{display:inline-flex;align-items:center;gap:8px;margin-top:10px;font-weight:800;font-size:18px;color:var(--brand)}
   .qty small{font-weight:600;font-size:11px;color:var(--muted)}
   .card-actions{display:flex;gap:6px;padding:0 12px 12px}
@@ -161,9 +175,10 @@ const $ = (s,el=document)=>el.querySelector(s);
 const main = $("#main");
 const overlay = $("#overlay");
 const modal = $("#modal");
-let state = { view:"catalogo", items:[], q:"", fSupplier:"", fColor:"", fUnidade:"", pendingPhoto:null };
+let state = { view:"catalogo", items:[], q:"", fSupplier:"", fColor:"", fUnidade:"", fLocal:"", pendingPhoto:null };
 const UNIDADES = ["Lola CCMQ","Central","Lola MAC"];
 const UNIDADE_COR = {"Lola CCMQ":"#A8272A","Central":"#2D6A4F","Lola MAC":"#1A5276"};
+const LOCAIS = ["Em uso MAC","Em uso Lola","Em uso Central","Depósito Central","Depósito MAC","Calabouço","Depósito Bebidas","Escritório"];
 
 // Redimensiona/comprime a foto no próprio celular antes de enviar (rápido no 4G)
 function compressImage(file, maxDim=1280, quality=0.82){
@@ -236,8 +251,8 @@ async function renderCatalogo(){
   const colors=[...new Set(state.items.map(i=>i.color).filter(Boolean))].sort();
   const q=state.q.toLowerCase();
   const filtered=state.items.filter(i=>{
-    const hit=!q||[i.name,i.reference,i.supplier,i.color,i.category].some(v=>(v||"").toLowerCase().includes(q));
-    return hit && (!state.fSupplier||i.supplier===state.fSupplier) && (!state.fColor||i.color===state.fColor) && (!state.fUnidade||i.unidade===state.fUnidade);
+    const hit=!q||[i.name,i.reference,i.supplier,i.color,i.category,i.local,i.unidade].some(v=>(v||"").toLowerCase().includes(q));
+    return hit && (!state.fSupplier||i.supplier===state.fSupplier) && (!state.fColor||i.color===state.fColor) && (!state.fUnidade||i.unidade===state.fUnidade) && (!state.fLocal||i.local===state.fLocal);
   });
   main.innerHTML=`
     <div class="toolbar">
@@ -248,42 +263,35 @@ async function renderCatalogo(){
         ${colors.map(c=>`<option ${c===state.fColor?"selected":""}>${esc(c)}</option>`).join("")}</select>
       <select id="fUnidade"><option value="">Todas as unidades</option>
         ${UNIDADES.map(u=>`<option ${u===state.fUnidade?"selected":""}>${esc(u)}</option>`).join("")}</select>
+      <select id="fLocal"><option value="">Todos os locais</option>
+        ${LOCAIS.map(l=>`<option ${l===state.fLocal?"selected":""}>${esc(l)}</option>`).join("")}</select>
       <button class="btn" id="novoItem">+ Novo item</button>
     </div>
-    ${filtered.length? `<div class="grid">${filtered.map(cardItem).join("")}</div>`
+    ${filtered.length? `<div class="tablewrap"><table class="grid-table"><thead><tr><th></th><th>Nome</th><th>Qtd</th><th>Local</th><th>Unidade</th><th>Fornecedor</th><th>Ref</th><th>Cor</th><th></th></tr></thead><tbody>${filtered.map(rowItem).join("")}</tbody></table></div>`
       : `<div class="empty"><div>Nenhum item ${state.items.length?"encontrado":"cadastrado ainda"}.</div></div>`}
     <p class="mini" style="margin-top:14px">${filtered.length} de ${state.items.length} itens · estoque total: ${state.items.reduce((a,i)=>a+(i.quantity||0),0)} peças</p>`;
   $("#q").addEventListener("input",e=>{state.q=e.target.value;clearTimeout(window._qt);window._qt=setTimeout(renderCatalogo,250);});
   $("#fSupplier").addEventListener("change",e=>{state.fSupplier=e.target.value;renderCatalogo();});
   $("#fColor").addEventListener("change",e=>{state.fColor=e.target.value;renderCatalogo();});
   $("#fUnidade").addEventListener("change",e=>{state.fUnidade=e.target.value;renderCatalogo();});
+  $("#fLocal").addEventListener("change",e=>{state.fLocal=e.target.value;renderCatalogo();});
   $("#novoItem").addEventListener("click",()=>itemForm());
   main.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>itemForm(b.dataset.edit)));
   main.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>delItem(b.dataset.del)));
 }
 
-function cardItem(i){
-  return `<div class="card">
-    <div class="thumb">${i.photo_url?`<img src="${esc(i.photo_url)}" alt="">`:""}</div>
-    <div class="body">
-      <h3>${esc(i.name)}</h3>
-      <div class="meta">
-        ${i.reference?`<div><b>Ref:</b> ${esc(i.reference)}</div>`:""}
-        ${i.supplier?`<div><b>Fornecedor:</b> ${esc(i.supplier)}</div>`:""}
-      </div>
-      <div class="chips">
-        ${i.unidade?`<span class="chip unidade" style="background:${UNIDADE_COR[i.unidade]||'var(--brand)'}">${esc(i.unidade)}</span>`:`<span class="chip semuni">sem unidade</span>`}
-        ${i.color?`<span class="chip">${esc(i.color)}</span>`:""}
-        ${i.category?`<span class="chip">${esc(i.category)}</span>`:""}
-      </div>
-      <div class="qty">${i.quantity||0} <small>em estoque</small></div>
-    </div>
-    <div class="card-actions">
-      <button class="btn ghost sm" data-edit="${i.id}">Editar</button>
-      <div class="spacer"></div>
-      <button class="btn ghost sm" data-del="${i.id}" title="Excluir">🗑</button>
-    </div>
-  </div>`;
+function rowItem(i){
+  return `<tr>
+    <td>${i.photo_url?`<img class="thumb-sm" src="${esc(i.photo_url)}" alt="">`:`<span class="thumb-sm noimg"></span>`}</td>
+    <td class="tcell-nome">${esc(i.name)}</td>
+    <td class="tcell-qtd">${i.quantity||0}</td>
+    <td>${i.local?`<span class="chip local">${esc(i.local)}</span>`:`<span class="chip semuni">—</span>`}</td>
+    <td>${i.unidade?`<span class="chip unidade" style="background:${UNIDADE_COR[i.unidade]||'var(--brand)'}">${esc(i.unidade)}</span>`:`<span class="chip semuni">—</span>`}</td>
+    <td>${esc(i.supplier||"")}</td>
+    <td>${esc(i.reference||"")}</td>
+    <td>${i.color?`<span class="chip">${esc(i.color)}</span>`:""}</td>
+    <td class="tcell-acoes"><button class="iconbtn" data-edit="${i.id}" title="Editar">✏️</button><button class="iconbtn" data-del="${i.id}" title="Excluir">🗑</button></td>
+  </tr>`;
 }
 
 function itemForm(id){
@@ -310,11 +318,18 @@ function itemForm(id){
       </div>
     </div>
     <div class="field"><label>Nome *</label><input id="f_name" value="${esc(it.name)}" placeholder="Ex: Prato raso branco"></div>
-    <div class="field"><label>Unidade *</label>
-      <select id="f_unidade">
-        <option value="">Selecione…</option>
-        ${UNIDADES.map(u=>`<option ${it.unidade===u?"selected":""}>${esc(u)}</option>`).join("")}
-      </select></div>
+    <div class="field2">
+      <div class="field"><label>Unidade *</label>
+        <select id="f_unidade">
+          <option value="">Selecione…</option>
+          ${UNIDADES.map(u=>`<option ${it.unidade===u?"selected":""}>${esc(u)}</option>`).join("")}
+        </select></div>
+      <div class="field"><label>Local *</label>
+        <select id="f_local">
+          <option value="">Selecione…</option>
+          ${LOCAIS.map(l=>`<option ${it.local===l?"selected":""}>${esc(l)}</option>`).join("")}
+        </select></div>
+    </div>
     <div class="field2">
       <div class="field"><label>Referência</label><input id="f_reference" value="${esc(it.reference)}"></div>
       <div class="field"><label>Fornecedor</label><input id="f_supplier" value="${esc(it.supplier)}"></div>
@@ -370,6 +385,8 @@ async function saveItem(id){
     if(!name){toast("Informe o nome");btn.disabled=false;btn.textContent="Salvar";return;}
     const unidade=$("#f_unidade").value;
     if(!unidade){toast("Selecione a unidade (Lola CCMQ, Central ou Lola MAC)");btn.disabled=false;btn.textContent="Salvar";return;}
+    const local=$("#f_local").value;
+    if(!local){toast("Selecione o local do item");btn.disabled=false;btn.textContent="Salvar";return;}
     let photo_url=id?(state.items.find(x=>x.id===id)||{}).photo_url:null;
     const file=state.pendingPhoto;
     if(file){
@@ -379,7 +396,7 @@ async function saveItem(id){
       photo_url=sb.storage.from("loucas").getPublicUrl(path).data.publicUrl;
     }
     const payload={
-      name, unidade, reference:$("#f_reference").value.trim()||null,
+      name, unidade, local, reference:$("#f_reference").value.trim()||null,
       supplier:$("#f_supplier").value.trim()||null, color:$("#f_color").value.trim()||null,
       category:$("#f_category").value.trim()||null, quantity:parseInt($("#f_quantity").value||"0",10),
       notes:$("#f_notes").value.trim()||null, photo_url, updated_at:new Date().toISOString()
