@@ -70,6 +70,8 @@ Content-Type: text/plain; charset=utf-8
   .grid-table tbody tr:last-child td{border-bottom:0}
   .grid-table tbody tr:hover{background:var(--warm)}
   .tcell-nome{font-weight:700;white-space:normal;min-width:150px}
+  .tcell-nome[data-edit]{color:var(--brand-d);cursor:pointer}
+  .tcell-nome[data-edit]:hover,.tcell-nome[data-edit]:active{text-decoration:underline}
   .tcell-qtd{font-weight:800;color:var(--brand);text-align:center}
   .thumb-sm{width:42px;height:42px;border-radius:8px;object-fit:cover;display:block;background:var(--warm)}
   .thumb-sm.noimg{display:inline-block;background:var(--warm)}
@@ -313,7 +315,7 @@ async function renderCatalogo(){
 function rowItem(i){
   return `<tr>
     <td>${i.photo_url?`<img class="thumb-sm" src="${esc(i.photo_url)}" alt="">`:`<span class="thumb-sm noimg"></span>`}</td>
-    <td class="tcell-nome">${esc(i.name)}</td>
+    <td class="tcell-nome" data-edit="${i.id}" title="Toque para editar">${esc(i.name)}</td>
     <td>${esc(i.medida||"")}</td>
     <td class="tcell-qtd ${(i.estoque_minimo!=null && (i.quantity||0) < i.estoque_minimo)?'baixo':''}">${i.quantity||0}${(i.estoque_minimo!=null)?`<div class="minlbl">${((i.quantity||0)<i.estoque_minimo)?"⚠ ":""}mín ${i.estoque_minimo}</div>`:""}</td>
     <td>${i.local?`<span class="chip local">${esc(i.local)}</span>`:`<span class="chip semuni">—</span>`}</td>
