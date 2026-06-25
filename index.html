@@ -1,3 +1,7 @@
+https://raw.githubusercontent.com/LolaCCMQ/LolaLoucas/main/index.html
+→ https://raw.githubusercontent.com/LolaCCMQ/LolaLoucas/main/index.html
+Content-Type: text/plain; charset=utf-8
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -326,6 +330,7 @@ function itemForm(id){
   const it=id?state.items.find(x=>x.id===id):{};
   state.pendingPhoto=null;
   openModal(`
+    <button class="back" onclick="closeModal()">← Voltar</button>
     <h2>${id?"Editar item":"Novo item"}</h2>
     <div class="field">
       <label>Foto</label>
@@ -353,7 +358,7 @@ function itemForm(id){
           <option value="">Selecione…</option>
           ${UNIDADES.map(u=>`<option ${it.unidade===u?"selected":""}>${esc(u)}</option>`).join("")}
         </select></div>
-      <div class="field"><label>Local *</label>
+      <div class="field"><label>Local</label>
         <select id="f_local">
           <option value="">Selecione…</option>
           ${LOCAIS.map(l=>`<option ${it.local===l?"selected":""}>${esc(l)}</option>`).join("")}
@@ -434,7 +439,6 @@ async function saveItem(id){
     const unidade=$("#f_unidade").value;
     if(!unidade){toast("Selecione a unidade (Lola CCMQ, Central ou Lola MAC)");btn.disabled=false;btn.textContent="Salvar";return;}
     const local=$("#f_local").value;
-    if(!local){toast("Selecione o local do item");btn.disabled=false;btn.textContent="Salvar";return;}
     let photo_url=id?(state.items.find(x=>x.id===id)||{}).photo_url:null;
     const file=state.pendingPhoto;
     if(file){
