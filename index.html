@@ -153,21 +153,22 @@
     .grid-table{font-size:13px}
     .grid-table thead{display:none}
     .grid-table,.grid-table tbody,.grid-table tr,.grid-table td{display:block;width:100%;box-sizing:border-box}
-    .grid-table tr{position:relative;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:var(--shadow);padding:12px 14px 12px 72px;margin-bottom:12px;min-height:62px}
-    .grid-table td{border:none;padding:1px 0;white-space:normal}
-    .grid-table tr>td:first-child{position:absolute;left:12px;top:12px;width:48px;height:48px;padding:0}
-    .grid-table tr>td:first-child .thumb-sm{width:48px;height:48px}
-    .grid-table td[data-label="Nome"]{font-weight:800;font-size:1rem;color:var(--brand-d);padding-right:64px;line-height:1.2}
-    .grid-table td.tcell-qtd{position:absolute;right:12px;top:11px;width:auto;text-align:right;font-size:1.05rem}
+    .grid-table tr{position:relative;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:var(--shadow);padding:15px 16px 15px 76px;margin-bottom:14px;min-height:70px}
+    .grid-table td{border:none;padding:0;white-space:normal;line-height:1.4}
+    .grid-table tr>td:first-child{position:absolute;left:14px;top:15px;width:50px;height:50px;padding:0}
+    .grid-table tr>td:first-child .thumb-sm{width:50px;height:50px;border-radius:10px}
+    .grid-table td[data-label="Nome"]{font-weight:800;font-size:1.02rem;color:var(--brand-d);padding-right:60px;line-height:1.25;margin-bottom:5px}
+    .grid-table td.tcell-qtd{position:absolute;right:14px;top:14px;width:auto;text-align:right;font-size:1.1rem;font-weight:800}
     .grid-table td.tcell-qtd .minlbl{font-size:9px}
-    .grid-table td[data-label="Medida"]:not(:empty),.grid-table td[data-label="Fornecedor"]:not(:empty),.grid-table td[data-label="Ref"]:not(:empty){font-size:12.5px;color:var(--ink);margin-top:2px}
+    .grid-table td[data-label="Medida"]:not(:empty),.grid-table td[data-label="Fornecedor"]:not(:empty),.grid-table td[data-label="Ref"]:not(:empty){font-size:13px;color:var(--ink);margin-top:6px}
     .grid-table td[data-label="Medida"]:not(:empty):before{content:"Medida: ";color:var(--muted)}
     .grid-table td[data-label="Fornecedor"]:not(:empty):before{content:"Fornecedor: ";color:var(--muted)}
     .grid-table td[data-label="Ref"]:not(:empty):before{content:"Ref: ";color:var(--muted)}
-    .grid-table td[data-label="Local"],.grid-table td[data-label="Unidade"],.grid-table td[data-label="Categoria"],.grid-table td[data-label="Cor"]{display:inline-block;width:auto;margin:4px 4px 0 0}
+    .grid-table td[data-label="Local"],.grid-table td[data-label="Unidade"],.grid-table td[data-label="Categoria"],.grid-table td[data-label="Cor"]{display:inline-block;width:auto;margin:8px 6px 0 0;vertical-align:middle}
     .grid-table .chip.semuni{display:none}
+    .grid-table .chip{padding:5px 11px;font-size:12px}
     .grid-table td:empty{display:none}
-    .grid-table td.tcell-acoes{text-align:right;margin-top:8px}
+    .grid-table td.tcell-acoes{text-align:right;margin-top:12px}
     .grid-table td.tcell-acoes .iconbtn{font-size:19px;padding:4px 8px}
     .modal{max-width:100%;border-radius:14px;padding:16px}
     .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
