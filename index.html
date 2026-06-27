@@ -148,28 +148,41 @@
     .toolbar .search{flex:1 1 100%;min-width:0;padding:8px 11px;font-size:13px}
     .toolbar select{flex:1 1 calc(33.33% - 5px);min-width:0;padding:8px 7px;font-size:12px}
     .toolbar .btn{flex:1 1 calc(50% - 4px);justify-content:center;padding:9px 10px;font-size:13px}
-    /* catalogo vira cartoes */
+    /* catalogo: cada item vira um CARD (flex) */
     .tablewrap{overflow:visible;border:none;background:transparent;box-shadow:none}
-    .grid-table{font-size:13px}
     .grid-table thead{display:none}
-    .grid-table,.grid-table tbody,.grid-table tr,.grid-table td{display:block;width:100%;box-sizing:border-box}
-    .grid-table tr{position:relative;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:var(--shadow);padding:15px 16px 15px 76px;margin-bottom:14px;min-height:70px}
-    .grid-table td{border:none;padding:0;white-space:normal;line-height:1.4}
-    .grid-table tr>td:first-child{position:absolute;left:14px;top:15px;width:50px;height:50px;padding:0}
-    .grid-table tr>td:first-child .thumb-sm{width:50px;height:50px;border-radius:10px}
-    .grid-table td[data-label="Nome"]{font-weight:800;font-size:1.02rem;color:var(--brand-d);padding-right:60px;line-height:1.25;margin-bottom:5px}
-    .grid-table td.tcell-qtd{position:absolute;right:14px;top:14px;width:auto;text-align:right;font-size:1.1rem;font-weight:800}
-    .grid-table td.tcell-qtd .minlbl{font-size:9px}
-    .grid-table td[data-label="Medida"]:not(:empty),.grid-table td[data-label="Fornecedor"]:not(:empty),.grid-table td[data-label="Ref"]:not(:empty){font-size:13px;color:var(--ink);margin-top:6px}
+    .grid-table,.grid-table tbody{display:block;width:100%}
+    .grid-table tr{display:flex;flex-wrap:wrap;align-items:flex-start;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:14px}
+    .grid-table td{display:block;border:none;padding:0;white-space:normal;line-height:1.4;font-size:13px;color:var(--ink)}
+    /* foto no topo-esquerda */
+    .grid-table tr>td:first-child{order:0;flex:0 0 56px;width:56px;padding-right:10px}
+    .grid-table tr>td:first-child .thumb-sm{width:54px;height:54px;border-radius:10px}
+    /* nome + quantidade na 1a linha (ao lado da foto) */
+    .grid-table td[data-label="Nome"]{order:1;flex:1 1 auto;min-width:0;font-weight:800;font-size:1.04rem;color:var(--brand-d);line-height:1.25}
+    .grid-table td.tcell-qtd{order:2;flex:0 0 auto;width:auto;margin-left:10px;text-align:right;font-size:1.18rem;font-weight:800;color:var(--brand)}
+    .grid-table td.tcell-qtd .minlbl{font-size:9px;font-weight:600;color:var(--muted)}
+    /* medida (largura cheia, abaixo) */
+    .grid-table td[data-label="Medida"]{order:3;flex:1 1 100%;color:var(--muted);margin-top:9px}
     .grid-table td[data-label="Medida"]:not(:empty):before{content:"Medida: ";color:var(--muted)}
+    /* chips todos juntos */
+    .grid-table td[data-label="Local"]{order:4}
+    .grid-table td[data-label="Unidade"]{order:5}
+    .grid-table td[data-label="Categoria"]{order:6}
+    .grid-table td[data-label="Cor"]{order:7}
+    .grid-table td[data-label="Local"],.grid-table td[data-label="Unidade"],.grid-table td[data-label="Categoria"],.grid-table td[data-label="Cor"]{flex:0 0 auto;width:auto;margin:9px 7px 0 0}
+    /* fornecedor / ref (largura cheia) */
+    .grid-table td[data-label="Fornecedor"]{order:8;flex:1 1 100%;margin-top:11px}
+    .grid-table td[data-label="Ref"]{order:9;flex:1 1 100%;margin-top:4px}
     .grid-table td[data-label="Fornecedor"]:not(:empty):before{content:"Fornecedor: ";color:var(--muted)}
     .grid-table td[data-label="Ref"]:not(:empty):before{content:"Ref: ";color:var(--muted)}
-    .grid-table td[data-label="Local"],.grid-table td[data-label="Unidade"],.grid-table td[data-label="Categoria"],.grid-table td[data-label="Cor"]{display:inline-block;width:auto;margin:8px 6px 0 0;vertical-align:middle}
-    .grid-table .chip.semuni{display:none}
-    .grid-table .chip{padding:5px 11px;font-size:12px}
+    /* acoes */
+    .grid-table td.tcell-acoes{order:10;flex:1 1 100%;text-align:right;margin-top:12px}
+    .grid-table td.tcell-acoes .iconbtn{font-size:20px;padding:4px 8px}
+    /* esconde campos vazios */
     .grid-table td:empty{display:none}
-    .grid-table td.tcell-acoes{text-align:right;margin-top:12px}
-    .grid-table td.tcell-acoes .iconbtn{font-size:19px;padding:4px 8px}
+    .grid-table td:has(.chip.semuni){display:none}
+    .grid-table .chip.semuni{display:none}
+    .grid-table .chip{padding:5px 12px;font-size:12px}
     .modal{max-width:100%;border-radius:14px;padding:16px}
     .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
     .btn,.checkwrap input{min-height:44px}
