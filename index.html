@@ -139,16 +139,39 @@
        border:0;background:var(--brand);color:#fff;font-size:30px;line-height:1;box-shadow:0 6px 18px rgba(168,39,42,.35);cursor:pointer}
   @media(max-width:560px){
     .field2{grid-template-columns:1fr}
-    .bar{flex-wrap:wrap;gap:10px;padding:10px 14px}
-    nav{width:100%;margin-left:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
-    nav button{flex:0 0 auto;white-space:nowrap;padding:8px 12px;font-size:13px}
-    .toolbar{gap:8px}
-    .search{flex-basis:100%}
-    .toolbar select{flex:1 1 45%}
-    .toolbar .btn{flex:1 1 100%;justify-content:center;padding:13px 16px;font-size:15px}
+    .bar{flex-wrap:wrap;gap:10px;padding:10px 12px}
+    /* menu: tudo numa linha so */
+    nav{width:100%;margin-left:0;overflow:visible;gap:3px;flex-wrap:nowrap}
+    nav button{flex:1 1 0;min-width:0;white-space:nowrap;padding:7px 3px;font-size:11px;border-radius:999px;min-height:40px}
+    /* filtros menores, ~3 por linha */
+    .toolbar{gap:7px}
+    .toolbar .search{flex:1 1 100%;min-width:0;padding:8px 11px;font-size:13px}
+    .toolbar select{flex:1 1 calc(33.33% - 5px);min-width:0;padding:8px 7px;font-size:12px}
+    .toolbar .btn{flex:1 1 calc(50% - 4px);justify-content:center;padding:9px 10px;font-size:13px}
+    /* catalogo vira cartoes */
+    .tablewrap{overflow:visible;border:none;background:transparent;box-shadow:none}
+    .grid-table{font-size:13px}
+    .grid-table thead{display:none}
+    .grid-table,.grid-table tbody,.grid-table tr,.grid-table td{display:block;width:100%;box-sizing:border-box}
+    .grid-table tr{position:relative;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:var(--shadow);padding:12px 14px 12px 72px;margin-bottom:12px;min-height:62px}
+    .grid-table td{border:none;padding:1px 0;white-space:normal}
+    .grid-table tr>td:first-child{position:absolute;left:12px;top:12px;width:48px;height:48px;padding:0}
+    .grid-table tr>td:first-child .thumb-sm{width:48px;height:48px}
+    .grid-table td[data-label="Nome"]{font-weight:800;font-size:1rem;color:var(--brand-d);padding-right:64px;line-height:1.2}
+    .grid-table td.tcell-qtd{position:absolute;right:12px;top:11px;width:auto;text-align:right;font-size:1.05rem}
+    .grid-table td.tcell-qtd .minlbl{font-size:9px}
+    .grid-table td[data-label="Medida"]:not(:empty),.grid-table td[data-label="Fornecedor"]:not(:empty),.grid-table td[data-label="Ref"]:not(:empty){font-size:12.5px;color:var(--ink);margin-top:2px}
+    .grid-table td[data-label="Medida"]:not(:empty):before{content:"Medida: ";color:var(--muted)}
+    .grid-table td[data-label="Fornecedor"]:not(:empty):before{content:"Fornecedor: ";color:var(--muted)}
+    .grid-table td[data-label="Ref"]:not(:empty):before{content:"Ref: ";color:var(--muted)}
+    .grid-table td[data-label="Local"],.grid-table td[data-label="Unidade"],.grid-table td[data-label="Categoria"],.grid-table td[data-label="Cor"]{display:inline-block;width:auto;margin:4px 4px 0 0}
+    .grid-table .chip.semuni{display:none}
+    .grid-table td:empty{display:none}
+    .grid-table td.tcell-acoes{text-align:right;margin-top:8px}
+    .grid-table td.tcell-acoes .iconbtn{font-size:19px;padding:4px 8px}
     .modal{max-width:100%;border-radius:14px;padding:16px}
     .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-    .btn,.checkwrap input,nav button{min-height:44px}
+    .btn,.checkwrap input{min-height:44px}
     .count-row input{width:72px;height:42px}
     .fab{display:flex;align-items:center;justify-content:center}
     main{padding-bottom:96px}
@@ -309,17 +332,17 @@ async function renderCatalogo(){
 
 function rowItem(i){
   return `<tr>
-    <td>${i.photo_url?`<img class="thumb-sm" src="${esc(i.photo_url)}" alt="">`:`<span class="thumb-sm noimg"></span>`}</td>
-    <td class="tcell-nome" data-edit="${i.id}" title="Toque para editar">${esc(i.name)}</td>
-    <td>${esc(i.medida||"")}</td>
-    <td class="tcell-qtd ${(i.estoque_minimo!=null && (i.quantity||0) < i.estoque_minimo)?'baixo':''}">${i.quantity||0}${(i.estoque_minimo!=null)?`<div class="minlbl">${((i.quantity||0)<i.estoque_minimo)?"⚠ ":""}mín ${i.estoque_minimo}</div>`:""}</td>
-    <td>${i.local?`<span class="chip local">${esc(i.local)}</span>`:`<span class="chip semuni">—</span>`}</td>
-    <td>${i.unidade?`<span class="chip unidade" style="background:${UNIDADE_COR[i.unidade]||'var(--brand)'}">${esc(i.unidade)}</span>`:`<span class="chip semuni">—</span>`}</td>
-    <td>${i.category?`<span class="chip">${esc(i.category)}</span>`:`<span class="chip semuni">—</span>`}</td>
-    <td>${esc(i.supplier||"")}</td>
-    <td>${esc(i.reference||"")}</td>
-    <td>${i.color?`<span class="chip">${esc(i.color)}</span>`:""}</td>
-    <td class="tcell-acoes"><button class="iconbtn" data-edit="${i.id}" title="Editar">✏️</button><button class="iconbtn" data-del="${i.id}" title="Excluir">🗑</button></td>
+    <td data-label="">${i.photo_url?`<img class="thumb-sm" src="${esc(i.photo_url)}" alt="">`:`<span class="thumb-sm noimg"></span>`}</td>
+    <td class="tcell-nome" data-label="Nome" data-edit="${i.id}" title="Toque para editar">${esc(i.name)}</td>
+    <td data-label="Medida">${esc(i.medida||"")}</td>
+    <td data-label="Qtd" class="tcell-qtd ${(i.estoque_minimo!=null && (i.quantity||0) < i.estoque_minimo)?'baixo':''}">${i.quantity||0}${(i.estoque_minimo!=null)?`<div class="minlbl">${((i.quantity||0)<i.estoque_minimo)?"⚠ ":""}mín ${i.estoque_minimo}</div>`:""}</td>
+    <td data-label="Local">${i.local?`<span class="chip local">${esc(i.local)}</span>`:`<span class="chip semuni">—</span>`}</td>
+    <td data-label="Unidade">${i.unidade?`<span class="chip unidade" style="background:${UNIDADE_COR[i.unidade]||'var(--brand)'}">${esc(i.unidade)}</span>`:`<span class="chip semuni">—</span>`}</td>
+    <td data-label="Categoria">${i.category?`<span class="chip">${esc(i.category)}</span>`:`<span class="chip semuni">—</span>`}</td>
+    <td data-label="Fornecedor">${esc(i.supplier||"")}</td>
+    <td data-label="Ref">${esc(i.reference||"")}</td>
+    <td data-label="Cor">${i.color?`<span class="chip">${esc(i.color)}</span>`:""}</td>
+    <td class="tcell-acoes" data-label=""><button class="iconbtn" data-edit="${i.id}" title="Editar">✏️</button><button class="iconbtn" data-del="${i.id}" title="Excluir">🗑</button></td>
   </tr>`;
 }
 
