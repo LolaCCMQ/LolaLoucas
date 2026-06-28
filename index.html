@@ -1,3 +1,7 @@
+https://raw.githubusercontent.com/LolaCCMQ/LolaLoucas/HEAD/index.html
+→ https://raw.githubusercontent.com/LolaCCMQ/LolaLoucas/HEAD/index.html
+Content-Type: text/plain; charset=utf-8
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -137,9 +141,33 @@
   /* FAB mobile */
   .fab{display:none;position:fixed;right:18px;bottom:18px;z-index:40;width:58px;height:58px;border-radius:50%;
        border:0;background:var(--brand);color:#fff;font-size:30px;line-height:1;box-shadow:0 6px 18px rgba(168,39,42,.35);cursor:pointer}
+  /* cartoes do catalogo (so no celular) */
+  .cardlist{display:none}
+  .mcard{border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:14px}
+  .mcard:last-child{margin-bottom:0}
+  .mc-head{display:flex;align-items:flex-start;gap:8px}
+  .mc-name{flex:1 1 auto;min-width:0;font-weight:800;font-size:0.98rem;color:var(--brand-d);line-height:1.25;cursor:pointer}
+  .mc-name:active{text-decoration:underline}
+  .mc-qty{flex:0 0 auto;text-align:right;font-size:1.25rem;font-weight:800;color:var(--brand);line-height:1}
+  .mc-qty.baixo{color:#c2453f}
+  .mc-qty .minlbl{font-size:9px;font-weight:600;color:var(--muted);margin-top:2px}
+  .mc-qty.baixo .minlbl{color:#c2453f}
+  .mc-medida{color:var(--muted);font-size:13px;margin-top:3px}
+  .mc-body{display:flex;align-items:flex-start;gap:12px;margin-top:11px}
+  .mc-foto{flex:0 0 72px;width:72px;height:72px;border-radius:12px;background:var(--warm);overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .mc-foto img{width:100%;height:100%;object-fit:cover;display:block}
+  .mc-col{flex:1 1 auto;min-width:0}
+  .mc-chips{display:flex;flex-wrap:wrap;gap:7px}
+  .mc-meta{font-size:13px;color:var(--ink)}
+  .mc-chips + .mc-meta{margin-top:10px}
+  .mc-meta + .mc-meta{margin-top:3px}
+  .mc-meta span{color:var(--muted)}
+  .mc-actions{text-align:right;margin-top:12px;border-top:1px solid #f0e6e6;padding-top:10px}
+  .mc-actions .iconbtn{font-size:19px;padding:5px 9px;margin-left:5px}
   @media(max-width:560px){
     .field2{grid-template-columns:1fr}
     .bar{flex-wrap:wrap;gap:10px;padding:10px 12px}
+    header{border-bottom:none}
     /* menu: tudo numa linha so */
     nav{width:100%;margin-left:0;overflow:visible;gap:3px;flex-wrap:nowrap}
     nav button{flex:1 1 0;min-width:0;white-space:nowrap;padding:7px 3px;font-size:11px;border-radius:999px;min-height:40px}
@@ -148,41 +176,9 @@
     .toolbar .search{flex:1 1 100%;min-width:0;padding:8px 11px;font-size:13px}
     .toolbar select{flex:1 1 calc(33.33% - 5px);min-width:0;padding:8px 7px;font-size:12px}
     .toolbar .btn{flex:1 1 calc(50% - 4px);justify-content:center;padding:9px 10px;font-size:13px}
-    /* catalogo: cada item vira um CARD (flex) */
-    .tablewrap{overflow:visible;border:none;background:transparent;box-shadow:none}
-    .grid-table thead{display:none}
-    .grid-table,.grid-table tbody{display:block;width:100%}
-    .grid-table tr{display:flex;flex-wrap:wrap;align-items:flex-start;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:14px}
-    .grid-table td{display:block;border:none;padding:0;white-space:normal;line-height:1.4;font-size:13px;color:var(--ink)}
-    /* foto no topo-esquerda */
-    .grid-table tr>td:first-child{order:0;flex:0 0 56px;width:56px;padding-right:10px}
-    .grid-table tr>td:first-child .thumb-sm{width:54px;height:54px;border-radius:10px}
-    /* nome + quantidade na 1a linha (ao lado da foto) */
-    .grid-table td[data-label="Nome"]{order:1;flex:1 1 auto;min-width:0;font-weight:800;font-size:1.04rem;color:var(--brand-d);line-height:1.25}
-    .grid-table td.tcell-qtd{order:2;flex:0 0 auto;width:auto;margin-left:10px;text-align:right;font-size:1.18rem;font-weight:800;color:var(--brand)}
-    .grid-table td.tcell-qtd .minlbl{font-size:9px;font-weight:600;color:var(--muted)}
-    /* medida (largura cheia, abaixo) */
-    .grid-table td[data-label="Medida"]{order:3;flex:1 1 100%;color:var(--muted);margin-top:9px}
-    .grid-table td[data-label="Medida"]:not(:empty):before{content:"Medida: ";color:var(--muted)}
-    /* chips todos juntos */
-    .grid-table td[data-label="Local"]{order:4}
-    .grid-table td[data-label="Unidade"]{order:5}
-    .grid-table td[data-label="Categoria"]{order:6}
-    .grid-table td[data-label="Cor"]{order:7}
-    .grid-table td[data-label="Local"],.grid-table td[data-label="Unidade"],.grid-table td[data-label="Categoria"],.grid-table td[data-label="Cor"]{flex:0 0 auto;width:auto;margin:9px 7px 0 0}
-    /* fornecedor / ref (largura cheia) */
-    .grid-table td[data-label="Fornecedor"]{order:8;flex:1 1 100%;margin-top:11px}
-    .grid-table td[data-label="Ref"]{order:9;flex:1 1 100%;margin-top:4px}
-    .grid-table td[data-label="Fornecedor"]:not(:empty):before{content:"Fornecedor: ";color:var(--muted)}
-    .grid-table td[data-label="Ref"]:not(:empty):before{content:"Ref: ";color:var(--muted)}
-    /* acoes */
-    .grid-table td.tcell-acoes{order:10;flex:1 1 100%;text-align:right;margin-top:12px}
-    .grid-table td.tcell-acoes .iconbtn{font-size:20px;padding:4px 8px}
-    /* esconde campos vazios */
-    .grid-table td:empty{display:none}
-    .grid-table td:has(.chip.semuni){display:none}
-    .grid-table .chip.semuni{display:none}
-    .grid-table .chip{padding:5px 12px;font-size:12px}
+    /* catalogo: no celular esconde a tabela e mostra os cartoes */
+    .tablewrap{display:none}
+    .cardlist{display:flex;flex-direction:column}
     .modal{max-width:100%;border-radius:14px;padding:16px}
     .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
     .btn,.checkwrap input{min-height:44px}
@@ -329,7 +325,7 @@ async function renderCatalogo(){
       <button class="btn ghost" id="imprimir">🖨️ Imprimir contagem</button>
       <button class="btn" id="novoItem">+ Novo item</button>
     </div>
-    ${filtered.length? `<div class="tablewrap"><table class="grid-table"><thead><tr><th></th><th>Nome</th><th>Medida</th><th>Qtd</th><th>Local</th><th>Unidade</th><th>Categoria</th><th>Fornecedor</th><th>Ref</th><th>Cor</th><th></th></tr></thead><tbody>${filtered.map(rowItem).join("")}</tbody></table></div>`
+    ${filtered.length? `<div class="tablewrap"><table class="grid-table"><thead><tr><th></th><th>Nome</th><th>Medida</th><th>Qtd</th><th>Local</th><th>Unidade</th><th>Categoria</th><th>Fornecedor</th><th>Ref</th><th>Cor</th><th></th></tr></thead><tbody>${filtered.map(rowItem).join("")}</tbody></table></div><div class="cardlist">${filtered.map(cardItem).join("")}</div>`
       : `<div class="empty"><div>Nenhum item ${state.items.length?"encontrado":"cadastrado ainda"}.</div></div>`}
     <p class="mini" style="margin-top:14px">${filtered.length} de ${state.items.length} itens · estoque total: ${state.items.reduce((a,i)=>a+(i.quantity||0),0)} peças</p>`;
   $("#q").addEventListener("input",e=>{state.q=e.target.value;clearTimeout(window._qt);window._qt=setTimeout(renderCatalogo,250);});
@@ -358,6 +354,36 @@ function rowItem(i){
     <td data-label="Cor">${i.color?`<span class="chip">${esc(i.color)}</span>`:""}</td>
     <td class="tcell-acoes" data-label=""><button class="iconbtn" data-edit="${i.id}" title="Editar">✏️</button><button class="iconbtn" data-del="${i.id}" title="Excluir">🗑</button></td>
   </tr>`;
+}
+
+function cardItem(i){
+  const baixo=(i.estoque_minimo!=null && (i.quantity||0) < i.estoque_minimo);
+  const minl=(i.estoque_minimo!=null)?`<div class="minlbl">${baixo?"⚠ ":""}mín ${i.estoque_minimo}</div>`:"";
+  const chips=[
+    i.color?`<span class="chip">${esc(i.color)}</span>`:"",
+    i.local?`<span class="chip local">${esc(i.local)}</span>`:"",
+    i.unidade?`<span class="chip unidade" style="background:${UNIDADE_COR[i.unidade]||'var(--brand)'}">${esc(i.unidade)}</span>`:"",
+    i.category?`<span class="chip">${esc(i.category)}</span>`:""
+  ].join("");
+  return `<div class="mcard">
+    <div class="mc-head">
+      <div class="mc-name" data-edit="${i.id}" title="Toque para editar">${esc(i.name)}</div>
+      <div class="mc-qty ${baixo?'baixo':''}">${i.quantity||0}${minl}</div>
+    </div>
+    ${i.medida?`<div class="mc-medida">Medida: ${esc(i.medida)}</div>`:""}
+    <div class="mc-body">
+      <div class="mc-foto">${i.photo_url?`<img src="${esc(i.photo_url)}" alt="">`:""}</div>
+      <div class="mc-col">
+        <div class="mc-chips">${chips}</div>
+        ${i.supplier?`<div class="mc-meta"><span>Fornecedor: </span>${esc(i.supplier)}</div>`:""}
+        ${i.reference?`<div class="mc-meta"><span>Ref: </span>${esc(i.reference)}</div>`:""}
+      </div>
+    </div>
+    <div class="mc-actions">
+      <button class="iconbtn" data-edit="${i.id}" title="Editar">✏️</button>
+      <button class="iconbtn" data-del="${i.id}" title="Excluir">🗑</button>
+    </div>
+  </div>`;
 }
 
 function itemForm(id){
