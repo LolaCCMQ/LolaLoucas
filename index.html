@@ -7,38 +7,40 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#FDFAF7; --card:#ffffff; --ink:#1E0A0A; --muted:#888888;
-    --line:#e8d5d5; --brand:#A8272A; --brand-d:#7C1A1C; --ok:#2D6A4F;
-    --warn:#C94040; --danger:#A8272A; --chip:#F9ECEC; --warm:#F2EDE8;
-    --shadow:0 2px 16px rgba(168,39,42,.10);
-    --serif:"Playfair Display",Georgia,serif;
+    --bg:#FBF7F1; --card:#ffffff; --ink:#2A1A17; --muted:#92837B;
+    --line:#ECE3D9; --brand:#A82A2A; --brand-d:#7E1E1F; --ok:#2E6B45;
+    --warn:#C94040; --danger:#A82A2A; --chip:#F6E7E5; --warm:#F4ECE4;
+    --body:#5A463E; --label:#B79A8E; --grad:linear-gradient(135deg,#B5302E,#7E1E1F);
+    --shadow:0 4px 18px rgba(126,30,31,.07);
+    --serif:"Fraunces",Georgia,serif;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:Nunito,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  body{margin:0;font-family:'Hanken Grotesk',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
        background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
-  header{position:sticky;top:0;z-index:30;background:#fff;
-         border-bottom:2px solid var(--brand)}
-  .bar{max-width:1500px;margin:0;padding:12px 20px;display:flex;align-items:center;gap:14px}
-  .logo{display:flex;align-items:center;gap:11px;line-height:1}
-  .logo-svg{height:40px;width:auto;display:block}
-  .logo span{font-family:Nunito,sans-serif;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.2px;
-             padding-left:11px;border-left:1px solid var(--line)}
-  nav{display:flex;gap:4px;margin-left:auto;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
-  nav button{border:0;background:transparent;color:var(--brand-d);font-weight:700;font-size:14px;
-             padding:8px 14px;border-radius:999px;cursor:pointer}
-  nav button:hover{background:var(--chip)}
-  nav button.active{background:var(--brand);color:#fff}
-  main h2{font-family:var(--serif)}
+  header{position:sticky;top:0;z-index:30;background:var(--grad);color:#fff}
+  .hdr{max-width:1500px;margin:0;padding:16px 20px 12px}
+  .hdr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .hdr-title{font-family:var(--serif);font-style:italic;font-weight:600;font-size:26px;color:#fff;line-height:1.1}
+  .hdr-sub{color:rgba(255,255,255,.82);font-size:13px;font-weight:500;margin-top:4px;min-height:17px}
+  .hdr-add{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:0;background:#fff;color:var(--brand);
+           font-size:24px;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center}
+  .hdr-add:hover{background:#fff5f2}
+  nav{display:flex;gap:6px;margin-top:14px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  nav button{border:0;background:rgba(255,255,255,.16);color:#fff;font-weight:600;font-size:13px;
+             padding:7px 13px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  nav button:hover{background:rgba(255,255,255,.26)}
+  nav button.active{background:#fff;color:var(--brand);font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+  main h2{font-family:var(--serif);font-style:italic;font-weight:600;color:var(--ink)}
   main{max-width:1500px;margin:0;padding:16px 20px 80px}
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
   input,select,textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);
         border-radius:10px;padding:10px 12px;outline:none}
   input:focus,select:focus,textarea:focus{border-color:var(--brand)}
   .search{flex:1;min-width:160px}
-  .btn{border:0;background:var(--brand);color:#fff;font-weight:700;font-size:14px;padding:10px 16px;
+  .btn{border:0;background:var(--grad);color:#fff;font-weight:700;font-size:14px;padding:10px 16px;
        border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
   .btn:hover{background:var(--brand-d)}
   .btn.ghost{background:var(--chip);color:var(--ink)}
@@ -46,26 +48,28 @@
   .btn.sm{padding:7px 11px;font-size:13px}
   .btn.danger{background:var(--danger)}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
   .thumb{aspect-ratio:4/3;background:#f3ede4 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="%23d9cdbd"><path d="M4 6h40v36H4z" fill="none" stroke="%23d9cdbd" stroke-width="2"/><circle cx="16" cy="18" r="4"/><path d="M8 38l12-12 8 8 6-6 8 8"/></svg>') center/40px no-repeat;
          display:flex;align-items:center;justify-content:center}
   .thumb img{width:100%;height:100%;object-fit:cover}
   .card .body{padding:12px}
-  .card h3{margin:0 0 4px;font-size:15px}
+  .card h3{margin:0 0 4px;font-size:17px;font-family:var(--serif);font-style:italic;font-weight:600;color:var(--ink)}
   .meta{font-size:12.5px;color:var(--muted);line-height:1.5}
   .meta b{color:var(--ink);font-weight:600}
   .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
   .chip{background:var(--chip);border-radius:999px;padding:3px 9px;font-size:11.5px;color:var(--brand-d);font-weight:600}
   .chip.unidade{background:var(--brand);color:#fff}
   .chip.semuni{background:#f0eae2;color:#a89a86}
-  .chip.local{background:#eef0f4;color:#3a4a5a}
+  .chip.local{background:#E6EEF8;color:#2A4A6A}
+  .chip.cor{background:#F6E7E5;color:#7E1E1F}
+  .chip.cat{background:#E6F3EA;color:#2E6B45}
   .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:var(--shadow)}
   .grid-table{width:100%;border-collapse:collapse;font-size:13.5px}
   .grid-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--brand-d);font-weight:800;padding:11px 12px;border-bottom:2px solid var(--line);white-space:nowrap;background:var(--chip)}
   .grid-table td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap}
   .grid-table tbody tr:last-child td{border-bottom:0}
   .grid-table tbody tr:hover{background:var(--warm)}
-  .tcell-nome{font-weight:700;white-space:normal;min-width:150px}
+  .tcell-nome{font-family:var(--serif);font-style:italic;font-weight:600;white-space:normal;min-width:150px;color:var(--ink)}
   .tcell-nome[data-edit]{color:var(--brand-d);cursor:pointer}
   .tcell-nome[data-edit]:hover,.tcell-nome[data-edit]:active{text-decoration:underline}
   .tcell-qtd{font-weight:800;color:var(--brand);text-align:center}
@@ -142,7 +146,7 @@
   .mcard{border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:14px}
   .mcard:last-child{margin-bottom:0}
   .mc-head{display:flex;align-items:flex-start;gap:8px}
-  .mc-name{flex:1 1 auto;min-width:0;font-weight:800;font-size:0.98rem;color:var(--brand-d);line-height:1.25;cursor:pointer}
+  .mc-name{flex:1 1 auto;min-width:0;font-family:var(--serif);font-style:italic;font-weight:600;font-size:1.12rem;color:var(--ink);line-height:1.2;cursor:pointer}
   .mc-name:active{text-decoration:underline}
   .mc-qty{flex:0 0 auto;text-align:right;font-size:1.25rem;font-weight:800;color:var(--brand);line-height:1}
   .mc-qty.baixo{color:#c2453f}
@@ -154,10 +158,10 @@
   .mc-foto img{width:100%;height:100%;object-fit:cover;display:block}
   .mc-col{flex:1 1 auto;min-width:0}
   .mc-chips{display:flex;flex-wrap:wrap;gap:7px}
-  .mc-meta{font-size:13px;color:var(--ink)}
+  .mc-meta{font-size:13px;color:var(--body)}
   .mc-chips + .mc-meta{margin-top:10px}
   .mc-meta + .mc-meta{margin-top:3px}
-  .mc-meta span{color:var(--muted)}
+  .mc-meta span{color:var(--label);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:10.5px;margin-right:3px}
   .mc-actions{text-align:right;margin-top:12px;border-top:1px solid #f0e6e6;padding-top:10px}
   .mc-actions .iconbtn{font-size:19px;padding:5px 9px;margin-left:5px}
   @media(max-width:560px){
@@ -179,7 +183,7 @@
     .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
     .btn,.checkwrap input{min-height:44px}
     .count-row input{width:72px;height:42px}
-    .fab{display:flex;align-items:center;justify-content:center}
+    .fab{display:none}
     main{padding-bottom:96px}
   }
 </style>
@@ -187,7 +191,14 @@
 <body>
 
 <header>
-  <div class="bar">
+  <div class="hdr">
+    <div class="hdr-top">
+      <div>
+        <div class="hdr-title">Louças &amp; Utensílios</div>
+        <div class="hdr-sub" id="hdrSub"></div>
+      </div>
+      <button class="hdr-add" id="hdrAdd" title="Adicionar">+</button>
+    </div>
     <nav id="nav">
       <button data-view="catalogo" class="active">Catálogo</button>
       <button data-view="contagens">Contagens</button>
@@ -256,16 +267,20 @@ $("#nav").addEventListener("click",e=>{
   document.querySelectorAll("#nav button").forEach(x=>x.classList.remove("active"));
   b.classList.add("active");state.view=b.dataset.view;render();
 });
-$("#fab").addEventListener("click",()=>{
+function primaryAction(){
   if(state.view==="catalogo")itemForm();
   else if(state.view==="eventos")eventoForm();
   else if(state.view==="contagens")novaContagem();
   else if(state.view==="pedidos")pedidoForm();
   else if(state.view==="quebras")quebraForm();
-});
+}
+$("#fab").addEventListener("click",primaryAction);
+$("#hdrAdd").addEventListener("click",primaryAction);
 
 function render(){
   if(!configured){renderSetup();return;}
+  const _subs={catalogo:"Catálogo de louças e utensílios",contagens:"Contagens de estoque",eventos:"Louças por evento",pedidos:"Pedidos de compra",quebras:"Registro de quebras"};
+  const _hs=document.getElementById("hdrSub"); if(_hs)_hs.textContent=_subs[state.view]||"";
   if(state.view==="catalogo")renderCatalogo();
   else if(state.view==="contagens")renderContagens();
   else if(state.view==="eventos")renderEventos();
@@ -332,6 +347,7 @@ async function renderCatalogo(){
   $("#fCategoria").addEventListener("change",e=>{state.fCategoria=e.target.value;renderCatalogo();});
   $("#imprimir").addEventListener("click",()=>imprimirContagem(filtered));
   $("#novoItem").addEventListener("click",()=>itemForm());
+  {const _hs=document.getElementById("hdrSub"); if(_hs)_hs.textContent=`${filtered.length} ${filtered.length===1?'item':'itens'} · ${filtered.reduce((a,i)=>a+(i.quantity||0),0)} peças`;}
   main.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>itemForm(b.dataset.edit)));
   main.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>delItem(b.dataset.del)));
 }
@@ -356,10 +372,10 @@ function cardItem(i){
   const baixo=(i.estoque_minimo!=null && (i.quantity||0) < i.estoque_minimo);
   const minl=(i.estoque_minimo!=null)?`<div class="minlbl">${baixo?"⚠ ":""}mín ${i.estoque_minimo}</div>`:"";
   const chips=[
-    i.color?`<span class="chip">${esc(i.color)}</span>`:"",
+    i.color?`<span class="chip cor">${esc(i.color)}</span>`:"",
     i.local?`<span class="chip local">${esc(i.local)}</span>`:"",
     i.unidade?`<span class="chip unidade" style="background:${UNIDADE_COR[i.unidade]||'var(--brand)'}">${esc(i.unidade)}</span>`:"",
-    i.category?`<span class="chip">${esc(i.category)}</span>`:""
+    i.category?`<span class="chip cat">${esc(i.category)}</span>`:""
   ].join("");
   return `<div class="mcard">
     <div class="mc-head">
