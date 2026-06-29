@@ -14,7 +14,7 @@
     --line:#ECE3D9; --brand:#A82A2A; --brand-d:#7E1E1F; --ok:#2E6B45;
     --warn:#C94040; --danger:#A82A2A; --chip:#F6E7E5; --warm:#F4ECE4;
     --body:#5A463E; --label:#B79A8E; --grad:linear-gradient(135deg,#B5302E,#7E1E1F);
-    --shadow:0 4px 18px rgba(126,30,31,.07);
+    --shadow:0 10px 28px rgba(168,42,42,.12);
     --serif:"Fraunces",Georgia,serif;
   }
   *{box-sizing:border-box}
@@ -48,7 +48,7 @@
   .btn.sm{padding:7px 11px;font-size:13px}
   .btn.danger{background:var(--danger)}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
   .thumb{aspect-ratio:4/3;background:#f3ede4 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="%23d9cdbd"><path d="M4 6h40v36H4z" fill="none" stroke="%23d9cdbd" stroke-width="2"/><circle cx="16" cy="18" r="4"/><path d="M8 38l12-12 8 8 6-6 8 8"/></svg>') center/40px no-repeat;
          display:flex;align-items:center;justify-content:center}
   .thumb img{width:100%;height:100%;object-fit:cover}
@@ -143,7 +143,7 @@
        border:0;background:var(--brand);color:#fff;font-size:30px;line-height:1;box-shadow:0 6px 18px rgba(168,39,42,.35);cursor:pointer}
   /* cartoes do catalogo (so no celular) */
   .cardlist{display:none}
-  .mcard{border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:14px}
+  .mcard{border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:14px}
   .mcard:last-child{margin-bottom:0}
   .mc-head{display:flex;align-items:flex-start;gap:8px}
   .mc-name{flex:1 1 auto;min-width:0;font-family:var(--serif);font-style:italic;font-weight:600;font-size:1.12rem;color:var(--ink);line-height:1.2;cursor:pointer}
