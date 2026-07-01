@@ -192,6 +192,19 @@
     .fab{display:none}
     main{padding-bottom:96px}
   }
+  @media(max-width:640px){
+    .tablewrap{overflow-x:visible;border:0;background:transparent;box-shadow:none;border-radius:0;padding:0}
+    .grid-table,.grid-table tbody{display:block;width:100%}
+    .grid-table thead{display:none}
+    .grid-table tr{display:block;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);margin-bottom:12px;padding:12px 14px}
+    .grid-table td{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:5px 0;border:0 !important;white-space:normal;text-align:right}
+    .grid-table td::before{content:attr(data-label);font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;text-align:left;flex:0 0 auto}
+    .grid-table td[data-label=""]{display:none}
+    .grid-table td.tcell-nome{display:block;text-align:left;font-size:16px;font-weight:800;color:var(--ink);padding:0 0 6px;border-bottom:1px solid var(--line) !important;margin-bottom:6px}
+    .grid-table td.tcell-nome::before{display:none}
+    .grid-table td.tcell-acoes{justify-content:flex-end}
+    .grid-table td.tcell-acoes::before{display:none}
+  }
 </style>
 </head>
 <body>
