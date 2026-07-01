@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Louças & Utensílios · Portal Lola</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.css">
+<style>
+  :root{
+    --bg:#FBF7F1; --card:#ffffff; --ink:#2A1A17; --muted:#92837B;
+    --line:#ECE3D9; --brand:#A82A2A; --brand-d:#7E1E1F; --ok:#2E6B45;
+    --warn:#C94040; --danger:#A82A2A; --chip:#F6E7E5; --warm:#F4ECE4;
+    --body:#5A463E; --label:#B79A8E; --grad:linear-gradient(135deg,#B5302E,#7E1E1F);
+    --shadow:0 10px 28px rgba(168,42,42,.12);
+    --serif:"Fraunces",Georgia,serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Hanken Grotesk',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+  header{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid #EFE6DC;color:var(--ink)}
+  .hdr-menu,.hdr-ic{width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--line);color:var(--brand);border-radius:13px;cursor:pointer;padding:0;font-size:20px}
+  .hdr-mid{flex:1;min-width:0}
+  .hdr{max-width:1500px;margin:0;padding:16px 20px 12px}
+  .hdr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .hdr-title{font-family:var(--serif);font-style:normal;font-weight:600;font-size:20px;color:var(--brand);line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hdr-sub{font-size:12px;font-weight:600;color:#8A7A72;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hdr-sub{color:rgba(255,255,255,.82);font-size:13px;font-weight:500;margin-top:4px;min-height:17px}
+  .hdr-add{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:0;background:#fff;color:var(--brand);
+           font-size:24px;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center}
+  .hdr-add:hover{background:#fff5f2}
+ 
+  nav{display:flex;gap:6px;margin-top:0;padding:11px 15px 0;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  nav button{border:0;background:var(--card);color:var(--brand);font-weight:600;font-size:12.5px;padding:8px 12px;border-radius:11px;cursor:pointer;white-space:nowrap;box-shadow:inset 0 0 0 1px #E9DDD0;display:flex;align-items:center;gap:5px}
+  nav button i{font-size:16px}
+  nav button:hover{background:var(--warm)}
+  nav button:hover{background:rgba(255,255,255,.26)}
+  nav button.active{background:var(--brand);color:#fff;font-weight:700;box-shadow:none}
+  main h2{font-family:var(--serif);font-style:normal;font-weight:600;color:var(--ink)}
+  main{max-width:1500px;margin:0;padding:16px 20px 80px}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  input,select,textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);
+        border-radius:10px;padding:10px 12px;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:var(--brand)}
+  .search{flex:1;min-width:160px}
+  .btn{border:0;background:var(--grad);color:#fff;font-weight:700;font-size:14px;padding:10px 16px;
+       border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+  .btn:hover{background:var(--brand-d)}
+  .btn.ghost{background:var(--chip);color:var(--ink)}
+  .btn.ghost:hover{background:#e7ddd0}
+  .btn.sm{padding:7px 11px;font-size:13px}
+  .btn.danger{background:var(--danger)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
+  .thumb{aspect-ratio:4/3;background:#f3ede4 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="%23d9cdbd"><path d="M4 6h40v36H4z" fill="none" stroke="%23d9cdbd" stroke-width="2"/><circle cx="16" cy="18" r="4"/><path d="M8 38l12-12 8 8 6-6 8 8"/></svg>') center/40px no-repeat;
+         display:flex;align-items:center;justify-content:center}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .card .body{padding:12px}
+  .card h3{margin:0 0 4px;font-size:17px;font-family:var(--serif);font-style:normal;font-weight:600;color:var(--ink)}
+  .meta{font-size:12.5px;color:var(--muted);line-height:1.5}
+  .meta b{color:var(--ink);font-weight:600}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .chip{background:var(--chip);border-radius:999px;padding:3px 9px;font-size:11.5px;color:var(--brand-d);font-weight:600}
+  .chip.unidade{background:var(--brand);color:#fff}
+  .chip.semuni{background:#f0eae2;color:#a89a86}
+  .chip.local{background:#E6EEF8;color:#2A4A6A}
+  .chip.cor{background:#F6E7E5;color:#7E1E1F}
+  .chip.cat{background:#E6F3EA;color:#2E6B45}
+  .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:var(--shadow)}
+  .grid-table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .grid-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--brand-d);font-weight:800;padding:11px 12px;border-bottom:2px solid var(--line);white-space:nowrap;background:var(--chip)}
+  .grid-table td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+  .grid-table tbody tr:last-child td{border-bottom:0}
+  .grid-table tbody tr:hover{background:var(--warm)}
+  .tcell-nome{font-family:var(--serif);font-style:normal;font-weight:600;white-space:normal;min-width:150px;color:var(--ink)}
+  .tcell-nome[data-edit]{color:var(--brand-d);cursor:pointer}
+  .tcell-nome[data-edit]:hover,.tcell-nome[data-edit]:active{text-decoration:underline}
+  .tcell-qtd{font-weight:800;color:var(--brand);text-align:center}
+  .thumb-sm{width:42px;height:42px;border-radius:8px;object-fit:cover;display:block;background:var(--warm)}
+  .thumb-sm.noimg{display:inline-block;background:var(--warm)}
+  .tcell-acoes{text-align:right}
+  .iconbtn{background:var(--chip);border:0;border-radius:8px;padding:6px 9px;cursor:pointer;font-size:14px;margin-left:5px}
+  .iconbtn:hover{background:#e7ddd0}
+  .tcell-qtd .minlbl{font-size:10px;font-weight:600;color:var(--muted);margin-top:1px}
+  .tcell-qtd.baixo{color:#c2453f}
+  .tcell-qtd.baixo .minlbl{color:#c2453f}
+  .movlist{display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto;margin:4px 0 10px}
+  .movrow{font-size:12.5px;padding:6px 9px;background:var(--bg);border:1px solid var(--line);border-radius:8px;line-height:1.5}
+  .movtag{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--chip);color:var(--brand-d)}
+  .movtag.tipo-quebra{background:#fbe9e7;color:#c2453f}
+  .movtag.tipo-entrada{background:#e8f4ee;color:#2D6A4F}
+  .movtag.tipo-transferncia{background:#eaf0f6;color:#1A5276}
+  .movtag.tipo-sada{background:#f3ede4;color:#8a6d52}
+  .movform{border-top:1px dashed var(--line);padding-top:8px}
+  .qty{display:inline-flex;align-items:center;gap:8px;margin-top:10px;font-weight:800;font-size:18px;color:var(--brand)}
+  .qty small{font-weight:600;font-size:11px;color:var(--muted)}
+  .card-actions{display:flex;gap:6px;padding:0 12px 12px}
+  .row{display:flex;align-items:center;gap:10px}
+  .spacer{flex:1}
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(40,30,20,.45);display:none;align-items:flex-start;
+           justify-content:center;z-index:50;padding:24px 14px;overflow:auto}
+  .overlay.open{display:flex}
+  .modal{background:var(--card);width:100%;max-width:560px;border-radius:16px;box-shadow:var(--shadow);
+         padding:20px;margin:auto}
+  .modal h2{margin:0 0 14px;font-size:19px}
+  .field{margin-bottom:12px;display:flex;flex-direction:column;gap:5px}
+  .field label{font-size:12.5px;font-weight:600;color:var(--muted)}
+  .field2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .modal-actions{display:flex;gap:10px;margin-top:8px}
+  .preview{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:none;margin-bottom:6px}
+  .photo-btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  /* Lists (contagens / eventos) */
+  .list{display:flex;flex-direction:column;gap:10px}
+  .listitem{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow);
+            display:flex;align-items:center;gap:12px;cursor:pointer}
+  .listitem:hover{border-color:var(--brand)}
+  .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.4px}
+  .badge.aberta,.badge.planejado{background:#eef4ee;color:var(--ok)}
+  .badge.fechada,.badge.concluido{background:#f0eae2;color:var(--muted)}
+  .badge.em_andamento{background:#fbeede;color:var(--warn)}
+  .badge.ped-solicitado{background:#fef3cd;color:#7d5a00}
+  .badge.ped-enviado{background:#dbeafe;color:#1e40af}
+  .badge.ped-recebido{background:#d1fae5;color:#065f46}
+  .count-row,.evt-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .count-row .name{flex:1}
+  .count-row input{width:90px;text-align:center}
+  .diff{font-size:12px;font-weight:700;min-width:54px;text-align:right}
+  .diff.pos{color:var(--ok)} .diff.neg{color:var(--danger)} .diff.zero{color:var(--muted)}
+  .mini{font-size:12px;color:var(--muted)}
+  .empty{text-align:center;color:var(--muted);padding:50px 20px}
+  .empty svg{opacity:.5;margin-bottom:10px}
+  .back{background:none;border:0;color:var(--brand);font-weight:700;cursor:pointer;padding:0;margin-bottom:12px;font-size:14px}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+         padding:11px 18px;border-radius:10px;font-size:14px;font-weight:600;z-index:99;opacity:0;
+         transition:opacity .25s, transform .25s;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+  .checkwrap{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;cursor:pointer;user-select:none}
+  .checkwrap input{width:18px;height:18px;accent-color:var(--ok)}
+  .returned{opacity:.55}
+  .setup{max-width:640px;margin:60px auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:var(--shadow)}
+  .setup h2{margin-top:0}
+  .setup code{background:var(--chip);padding:2px 6px;border-radius:6px;font-size:13px}
+  /* FAB mobile */
+  .fab{display:none;position:fixed;right:18px;bottom:18px;z-index:40;width:58px;height:58px;border-radius:50%;
+       border:0;background:var(--brand);color:#fff;font-size:30px;line-height:1;box-shadow:0 6px 18px rgba(168,39,42,.35);cursor:pointer}
+  /* cartoes do catalogo (so no celular) */
+  .cardlist{display:none}
+  .mcard{border:1px solid var(--line);border-radius:20px;background:var(--card);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:14px}
+  .mcard:last-child{margin-bottom:0}
+  .mc-head{display:flex;align-items:flex-start;gap:8px}
+  .mc-name{flex:1 1 auto;min-width:0;font-family:var(--serif);font-style:normal;font-weight:600;font-size:1.12rem;color:var(--ink);line-height:1.2;cursor:pointer}
+  .mc-name:active{text-decoration:underline}
+  .mc-qty{flex:0 0 auto;text-align:right;font-size:1.25rem;font-weight:800;color:var(--brand);line-height:1}
+  .mc-qty.baixo{color:#c2453f}
+  .mc-qty .minlbl{font-size:9px;font-weight:600;color:var(--muted);margin-top:2px}
+  .mc-qty.baixo .minlbl{color:#c2453f}
+  .mc-medida{color:var(--muted);font-size:13px;margin-top:3px}
+  .mc-body{display:flex;align-items:flex-start;gap:12px;margin-top:11px}
+  .mc-foto{flex:0 0 72px;width:72px;height:72px;border-radius:12px;background:var(--warm);overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .mc-foto img{width:100%;height:100%;object-fit:cover;display:block}
+  .mc-col{flex:1 1 auto;min-width:0}
+  .mc-chips{display:flex;flex-wrap:wrap;gap:7px}
+  .mc-meta{font-size:13px;color:var(--body)}
+  .mc-chips + .mc-meta{margin-top:10px}
+  .mc-meta + .mc-meta{margin-top:3px}
+  .mc-meta span{color:var(--label);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:10.5px;margin-right:3px}
+  .mc-actions{text-align:right;margin-top:12px;border-top:1px solid #f0e6e6;padding-top:10px}
+  .mc-actions .iconbtn{font-size:19px;padding:5px 9px;margin-left:5px}
+  @media(max-width:560px){
+    .field2{grid-template-columns:1fr}
+    .bar{display:flex;align-items:center;flex-wrap:nowrap;gap:10px;padding:12px 15px;max-width:1500px;margin:0}
+    header{border-bottom:none}
+    /* menu: tudo numa linha so */
+    nav{width:100%;margin-left:0;overflow:visible;gap:3px;flex-wrap:nowrap}
+    nav button{flex:1 1 0;min-width:0;white-space:nowrap;padding:7px 3px;font-size:11px;border-radius:999px;min-height:40px}
+    /* filtros menores, ~3 por linha */
+    .toolbar{gap:7px}
+    .toolbar .search{flex:1 1 100%;min-width:0;padding:8px 11px;font-size:13px}
+    .toolbar select{flex:1 1 calc(33.33% - 5px);min-width:0;padding:8px 7px;font-size:12px}
+    .toolbar .btn{flex:1 1 calc(50% - 4px);justify-content:center;padding:9px 10px;font-size:13px}
+    /* catalogo: no celular esconde a tabela e mostra os cartoes */
+    .tablewrap{display:none}
+    .cardlist{display:flex;flex-direction:column}
+    .modal{max-width:100%;border-radius:14px;padding:16px}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+    .btn,.checkwrap input{min-height:44px}
+    .count-row input{width:72px;height:42px}
+    .fab{display:none}
+    main{padding-bottom:96px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <button class="hdr-menu" onclick="voltarMenu()" title="Menu"><i class="ph-duotone ph-caret-left"></i></button>
+    <div class="hdr-mid"><div class="hdr-title">Louças &amp; Utensílios</div><div class="hdr-sub">Catálogo, contagens e eventos</div></div>
+    <button class="hdr-ic" onclick="hdrBusca()" title="Buscar"><i class="ph-duotone ph-magnifying-glass"></i></button>
+    <button class="hdr-ic" title="Notificações"><i class="ph-duotone ph-bell"></i></button>
+  </div>
+  <nav id="nav">
+    <button data-view="catalogo" class="active"><i class="ph-duotone ph-squares-four"></i>Catálogo</button>
+    <button data-view="contagens"><i class="ph-duotone ph-list-checks"></i>Contagens</button>
+    <button data-view="eventos"><i class="ph-duotone ph-calendar-dots"></i>Eventos</button>
+    <button data-view="pedidos"><i class="ph-duotone ph-shopping-cart"></i>Pedidos</button>
+    <button data-view="quebras"><i class="ph-duotone ph-warning"></i>Quebras</button>
+  </nav>
+</header>
+
+<main id="main"><div class="empty">Carregando…</div></main>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+<button class="fab" id="fab" title="Adicionar">+</button>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO — preencher com os dados do seu projeto Supabase
+   (Project Settings → API)
+   ============================================================ */
+const SUPABASE_URL  = "https://mvjbsdpfjhywhaonvpfl.supabase.co";
+const SUPABASE_ANON = "sb_publishable_VMJzYe1AwL9zEoFs-ljUIw_OOkDpqhy";
+/* ============================================================ */
+
+let sb = null;
+const configured = SUPABASE_URL.indexOf("http") === 0;
+if (configured) sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const $ = (s,el=document)=>el.querySelector(s);
+const main = $("#main");
+const overlay = $("#overlay");
+const modal = $("#modal");
+let state = { view:"catalogo", items:[], q:"", fSupplier:"", fColor:"", fUnidade:"", fLocal:"", fCategoria:"", pendingPhoto:null };
+const UNIDADES = ["Lola CCMQ","Central","Lola MAC"];
+const UNIDADE_COR = {"Lola CCMQ":"#A8272A","Central":"#2D6A4F","Lola MAC":"#1A5276"};
+const LOCAIS = ["Em uso MAC","Em uso Lola","Em uso Central","Depósito Central","Depósito MAC","Calabouço","Depósito Bebidas","Escritório"];
+
+// Redimensiona/comprime a foto no próprio celular antes de enviar (rápido no 4G)
+function compressImage(file, maxDim=1280, quality=0.82){
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width, h=img.height;
+      if(w>h && w>maxDim){h=Math.round(h*maxDim/w);w=maxDim;}
+      else if(h>=w && h>maxDim){w=Math.round(w*maxDim/h);h=maxDim;}
+      const c=document.createElement("canvas");c.width=w;c.height=h;
+      c.getContext("2d").drawImage(img,0,0,w,h);
+      c.toBlob(b=>resolve(b||file),"image/jpeg",quality);
+    };
+    img.onerror=()=>resolve(file);
+    img.src=URL.createObjectURL(file);
+  });
+}
+
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200);}
+function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function openModal(html){modal.innerHTML=html;overlay.classList.add("open");}
+function closeModal(){if(window._stopCamera){try{window._stopCamera();}catch(e){}}overlay.classList.remove("open");modal.innerHTML="";}
+overlay.addEventListener("click",e=>{if(e.target===overlay)closeModal();});
+
+/* ---------- Navegação ---------- */
+$("#nav").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  document.querySelectorAll("#nav button").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");state.view=b.dataset.view;render();
+});
+function primaryAction(){
+  if(state.view==="catalogo")itemForm();
+  else if(state.view==="eventos")eventoForm();
+  else if(state.view==="contagens")novaContagem();
+  else if(state.view==="pedidos")pedidoForm();
+  else if(state.view==="quebras")quebraForm();
+}
+$("#fab").addEventListener("click",primaryAction);
+$("#hdrAdd").addEventListener("click",primaryAction);
+
+function render(){
+  if(!configured){renderSetup();return;}
+  const _subs={catalogo:"Catálogo de louças e utensílios",contagens:"Contagens de estoque",eventos:"Louças por evento",pedidos:"Pedidos de compra",quebras:"Registro de quebras"};
+  const _hs=document.getElementById("hdrSub"); if(_hs)_hs.textContent=_subs[state.view]||"";
+  if(state.view==="catalogo")renderCatalogo();
+  else if(state.view==="contagens")renderContagens();
+  else if(state.view==="eventos")renderEventos();
+  else if(state.view==="pedidos")renderPedidos();
+  else if(state.view==="quebras")renderQuebras();
+}
+
+function renderSetup(){
+  main.innerHTML=`<div class="setup">
+    <h2>⚙️ Falta conectar ao banco de dados</h2>
+    <p>Este app precisa do endereço e da chave pública do seu projeto Supabase. Abra o arquivo
+    <code>inventario-lola.html</code> e substitua, no topo do script:</p>
+    <p><code>SUPABASE_URL</code> → a URL do projeto<br>
+       <code>SUPABASE_ANON</code> → a chave <b>anon / publishable</b></p>
+    <p class="mini">Ambos ficam em <b>Project Settings → API</b> no painel do Supabase.
+    Se eu (Claude) configurar para você, este aviso some sozinho.</p>
+  </div>`;
+}
+
+/* ============================================================
+   CATÁLOGO
+   ============================================================ */
+async function loadItems(){
+  const {data,error}=await sb.from("lola_loucas_itens").select("*").order("name");
+  if(error){toast("Erro ao carregar itens");console.error(error);return[];}
+  state.items=data||[];return state.items;
+}
+
+async function renderCatalogo(){
+  main.innerHTML=`<div class="empty">Carregando catálogo…</div>`;
+  await loadItems();
+  const suppliers=[...new Set(state.items.map(i=>i.supplier).filter(Boolean))].sort();
+  const colors=[...new Set(state.items.map(i=>i.color).filter(Boolean))].sort();
+  const categorias=[...new Set(state.items.map(i=>i.category).filter(Boolean))].sort();
+  const q=state.q.toLowerCase();
+  const filtered=state.items.filter(i=>{
+    const hit=!q||[i.name,i.reference,i.supplier,i.color,i.category,i.local,i.unidade,i.medida].some(v=>(v||"").toLowerCase().includes(q));
+    return hit && (!state.fSupplier||i.supplier===state.fSupplier) && (!state.fColor||i.color===state.fColor) && (!state.fUnidade||i.unidade===state.fUnidade) && (!state.fLocal||i.local===state.fLocal) && (!state.fCategoria||i.category===state.fCategoria);
+  });
+  main.innerHTML=`
+    <div class="toolbar">
+      <input class="search" id="q" placeholder="Buscar nome, referência, fornecedor…" value="${esc(state.q)}">
+      <select id="fSupplier"><option value="">Todos fornecedores</option>
+        ${suppliers.map(s=>`<option ${s===state.fSupplier?"selected":""}>${esc(s)}</option>`).join("")}</select>
+      <select id="fColor"><option value="">Todas as cores</option>
+        ${colors.map(c=>`<option ${c===state.fColor?"selected":""}>${esc(c)}</option>`).join("")}</select>
+      <select id="fUnidade"><option value="">Todas as unidades</option>
+        ${UNIDADES.map(u=>`<option ${u===state.fUnidade?"selected":""}>${esc(u)}</option>`).join("")}</select>
+      <select id="fLocal"><option value="">Todos os locais</option>
+        ${LOCAIS.map(l=>`<option ${l===state.fLocal?"selected":""}>${esc(l)}</option>`).join("")}</select>
+      <select id="fCategoria"><option value="">Todas as categorias</option>
+        ${categorias.map(c=>`<option ${c===state.fCategoria?"selected":""}>${esc(c)}</option>`).join("")}</select>
+      <button class="btn ghost" id="imprimir">🖨️ Imprimir contagem</button>
+      <button class="btn" id="novoItem">+ Novo item</button>
+    </div>
+    ${filtered.length? `<div class="tablewrap"><table class="grid-table"><thead><tr><th></th><th>Nome</th><th>Medida</th><th>Qtd</th><th>Local</th><th>Unidade</th><th>Categoria</th><th>Fornecedor</th><th>Ref</th><th>Cor</th><th></th></tr></thead><tbody>${filtered.map(rowItem).join("")}</tbody></table></div><div class="cardlist">${filtered.map(cardItem).join("")}</div>`
+      : `<div class="empty"><div>Nenhum item ${state.items.length?"encontrado":"cadastrado ainda"}.</div></div>`}
+    <p class="mini" style="margin-top:14px">${filtered.length} de ${state.items.length} itens · estoque total: ${state.items.reduce((a,i)=>a+(i.quantity||0),0)} peças</p>`;
+  $("#q").addEventListener("input",e=>{state.q=e.target.value;clearTimeout(window._qt);window._qt=setTimeout(renderCatalogo,250);});
+  $("#fSupplier").addEventListener("change",e=>{state.fSupplier=e.target.value;renderCatalogo();});
+  $("#fColor").addEventListener("change",e=>{state.fColor=e.target.value;renderCatalogo();});
+  $("#fUnidade").addEventListener("change",e=>{state.fUnidade=e.target.value;renderCatalogo();});
+  $("#fLocal").addEventListener("change",e=>{state.fLocal=e.target.value;renderCatalogo();});
+  $("#fCategoria").addEventListener("change",e=>{state.fCategoria=e.target.value;renderCatalogo();});
+  $("#imprimir").addEventListener("click",()=>imprimirContagem(filtered));
+  $("#novoItem").addEventListener("click",()=>itemForm());
+  {const _hs=document.getElementById("hdrSub"); if(_hs)_hs.textContent=`${filtered.length} ${filtered.length===1?'item':'itens'} · ${filtered.reduce((a,i)=>a+(i.quantity||0),0)} peças`;}
+  main.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>itemForm(b.dataset.edit)));
+  main.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>delItem(b.dataset.del)));
+}
+
+function rowItem(i){
+  return `<tr>
+    <td data-label="">${i.photo_url?`<img class="thumb-sm" src="${esc(i.photo_url)}" alt="">`:`<span class="thumb-sm noimg"></span>`}</td>
+    <td class="tcell-nome" data-label="Nome" data-edit="${i.id}" title="Toque para editar">${esc(i.name)}</td>
+    <td data-label="Medida">${esc(i.medida||"")}</td>
+    <td data-label="Qtd" class="tcell-qtd ${(i.estoque_minimo!=null && (i.quantity||0) < i.estoque_minimo)?'baixo':''}">${i.quantity||0}${(i.estoque_minimo!=null)?`<div class="minlbl">${((i.quantity||0)<i.estoque_minimo)?"⚠ ":""}mín ${i.estoque_minimo}</div>`:""}</td>
+    <td data-label="Local">${i.local?`<span class="chip local">${esc(i.local)}</span>`:`<span class="chip semuni">—</span>`}</td>
+    <td data-label="Unidade">${i.unidade?`<span class="chip unidade" style="background:${UNIDADE_COR[i.unidade]||'var(--brand)'}">${esc(i.unidade)}</span>`:`<span class="chip semuni">—</span>`}</td>
+    <td data-label="Categoria">${i.category?`<span class="chip">${esc(i.category)}</span>`:`<span class="chip semuni">—</span>`}</td>
+    <td data-label="Fornecedor">${esc(i.supplier||"")}</td>
+    <td data-label="Ref">${esc(i.reference||"")}</td>
+    <td data-label="Cor">${i.color?`<span class="chip">${esc(i.color)}</span>`:""}</td>
+    <td class="tcell-acoes" data-label=""><button class="iconbtn" data-edit="${i.id}" title="Editar">✏️</button><button class="iconbtn" data-del="${i.id}" title="Excluir">🗑</button></td>
+  </tr>`;
+}
+
+function cardItem(i){
+  const baixo=(i.estoque_minimo!=null && (i.quantity||0) < i.estoque_minimo);
+  const minl=(i.estoque_minimo!=null)?`<div class="minlbl">${baixo?"⚠ ":""}mín ${i.estoque_minimo}</div>`:"";
+  const chips=[
+    i.color?`<span class="chip cor">${esc(i.color)}</span>`:"",
+    i.local?`<span class="chip local">${esc(i.local)}</span>`:"",
+    i.unidade?`<span class="chip unidade" style="background:${UNIDADE_COR[i.unidade]||'var(--brand)'}">${esc(i.unidade)}</span>`:"",
+    i.category?`<span class="chip cat">${esc(i.category)}</span>`:""
+  ].join("");
+  return `<div class="mcard">
+    <div class="mc-head">
+      <div class="mc-name" data-edit="${i.id}" title="Toque para editar">${esc(i.name)}</div>
+      <div class="mc-qty ${baixo?'baixo':''}">${i.quantity||0}${minl}</div>
+    </div>
+    ${i.medida?`<div class="mc-medida">Medida: ${esc(i.medida)}</div>`:""}
+    <div class="mc-body">
+      <div class="mc-foto">${i.photo_url?`<img src="${esc(i.photo_url)}" alt="">`:""}</div>
+      <div class="mc-col">
+        <div class="mc-chips">${chips}</div>
+        ${i.supplier?`<div class="mc-meta"><span>Fornecedor: </span>${esc(i.supplier)}</div>`:""}
+        ${i.reference?`<div class="mc-meta"><span>Ref: </span>${esc(i.reference)}</div>`:""}
+      </div>
+    </div>
+    <div class="mc-actions">
+      <button class="iconbtn" data-edit="${i.id}" title="Editar">✏️</button>
+      <button class="iconbtn" data-del="${i.id}" title="Excluir">🗑</button>
+    </div>
+  </div>`;
+}
+
+function itemForm(id){
+  const it=id?state.items.find(x=>x.id===id):{};
+  state.pendingPhoto=null;
+  openModal(`
+    <button class="back" onclick="closeModal()">← Voltar</button>
+    <h2>${id?"Editar item":"Novo item"}</h2>
+    <div class="field">
+      <label>Foto</label>
+      <img class="preview" id="f_preview" ${it.photo_url?`src="${esc(it.photo_url)}" style="display:block"`:""}>
+      <div class="photo-btns">
+        <button type="button" class="btn ghost sm" id="btnCam">📷 Tirar foto</button>
+        <button type="button" class="btn ghost sm" id="btnLib">🖼️ Galeria</button>
+        <span class="mini" id="photoStatus"></span>
+      </div>
+      <input type="file" id="f_photo_cam" accept="image/*" capture="environment" hidden>
+      <input type="file" id="f_photo_lib" accept="image/*" hidden>
+      <div id="camWrap" style="display:none;margin-top:8px">
+        <video id="camVideo" autoplay playsinline muted style="width:100%;border-radius:10px;background:#000;aspect-ratio:4/3;object-fit:cover"></video>
+        <div class="photo-btns" style="margin-top:8px">
+          <button type="button" class="btn sm" id="camShot">📸 Capturar</button>
+          <button type="button" class="btn ghost sm" id="camCancel">Cancelar</button>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>Nome *</label><input id="f_name" value="${esc(it.name)}" placeholder="Ex: Prato raso branco"></div>
+    <div class="field"><label>Medida / tamanho</label><input id="f_medida" value="${esc(it.medida)}" placeholder="ex: 300ml, Grande, 25cm, unidade"></div>
+    <div class="field2">
+      <div class="field"><label>Unidade *</label>
+        <select id="f_unidade">
+          <option value="">Selecione…</option>
+          ${UNIDADES.map(u=>`<option ${it.unidade===u?"selected":""}>${esc(u)}</option>`).join("")}
+        </select></div>
+      <div class="field"><label>Local</label>
+        <select id="f_local">
+          <option value="">Selecione…</option>
+          ${LOCAIS.map(l=>`<option ${it.local===l?"selected":""}>${esc(l)}</option>`).join("")}
+        </select></div>
+    </div>
+    <div class="field2">
+      <div class="field"><label>Referência</label><input id="f_reference" value="${esc(it.reference)}"></div>
+      <div class="field"><label>Fornecedor</label><input id="f_supplier" value="${esc(it.supplier)}"></div>
+    </div>
+    <div class="field2">
+      <div class="field"><label>Cor</label><input id="f_color" value="${esc(it.color)}"></div>
+      <div class="field"><label>Categoria</label><input id="f_category" value="${esc(it.category)}" placeholder="Louça, utensílio…"></div>
+    </div>
+    <div class="field2">
+      <div class="field"><label>Quantidade em estoque</label><input type="number" id="f_quantity" value="${it.quantity!=null?it.quantity:0}" min="0"></div>
+      <div class="field"><label>Estoque mínimo</label><input type="number" id="f_min" value="${it.estoque_minimo!=null?it.estoque_minimo:''}" min="0" placeholder="opcional"></div>
+    </div>
+    <div class="field"><label>Observações</label><textarea id="f_notes" rows="2">${esc(it.notes)}</textarea></div>
+    ${id?`
+    <div class="field" style="border-top:1px solid var(--line);padding-top:12px;margin-top:4px">
+      <label>Movimentações / histórico</label>
+      <div id="movList" class="movlist"><div class="mini">carregando…</div></div>
+      <div class="movform">
+        <div class="field2">
+          <div class="field"><label>Tipo</label><select id="m_tipo"><option>Transferência</option><option>Saída</option><option>Entrada</option><option>Quebra</option></select></div>
+          <div class="field"><label>Quantidade</label><input type="number" id="m_qtd" min="1" value="1"></div>
+        </div>
+        <div class="field2">
+          <div class="field"><label>Para onde (destino)</label><select id="m_destino"><option value="">—</option><optgroup label="Unidades">${UNIDADES.map(u=>`<option>${esc(u)}</option>`).join("")}</optgroup><optgroup label="Locais">${LOCAIS.map(l=>`<option>${esc(l)}</option>`).join("")}</optgroup></select></div>
+          <div class="field"><label>Data</label><input type="date" id="m_data" value="${new Date().toISOString().slice(0,10)}"></div>
+        </div>
+        <div class="field"><label>Observação</label><input id="m_obs" placeholder="ex: enviado para evento"></div>
+        <label class="checkwrap" style="margin-top:2px"><input type="checkbox" id="m_baixa" checked> Atualizar a quantidade em estoque deste item</label>
+        <button type="button" class="btn ghost sm" id="m_add" style="margin-top:8px">+ Registrar movimentação</button>
+      </div>
+    </div>`:""}
+    <div class="modal-actions">
+      <button class="btn" id="saveItem">Salvar</button>
+      <button class="btn ghost" id="cancel">Cancelar</button>
+    </div>`);
+  $("#cancel").addEventListener("click",closeModal);
+  const onPhoto=async e=>{
+    const f=e.target.files[0];if(!f)return;
+    $("#photoStatus").textContent="processando…";
+    const blob=await compressImage(f);
+    state.pendingPhoto=blob;
+    const p=$("#f_preview");p.src=URL.createObjectURL(blob);p.style.display="block";
+    $("#photoStatus").textContent="foto pronta ✓";
+  };
+  const stopCamera=()=>{ if(window._camStream){window._camStream.getTracks().forEach(t=>t.stop());window._camStream=null;} const cw=$("#camWrap"); if(cw)cw.style.display="none"; };
+  window._stopCamera=stopCamera;
+  $("#btnCam").addEventListener("click",async()=>{
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$("#f_photo_cam").click();return;}
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
+      window._camStream=stream; const v=$("#camVideo"); v.srcObject=stream; $("#camWrap").style.display="block";
+    }catch(err){ console.error(err); toast("Câmera indisponível — use a Galeria"); $("#f_photo_cam").click(); }
+  });
+  $("#camCancel").addEventListener("click",stopCamera);
+  $("#camShot").addEventListener("click",()=>{
+    const v=$("#camVideo"); let w=v.videoWidth||1280,h=v.videoHeight||960; const md=1280;
+    if(w>h&&w>md){h=Math.round(h*md/w);w=md;}else if(h>md){w=Math.round(w*md/h);h=md;}
+    const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(v,0,0,w,h);
+    c.toBlob(blob=>{ if(!blob)return; state.pendingPhoto=blob; const p=$("#f_preview");p.src=URL.createObjectURL(blob);p.style.display="block"; $("#photoStatus").textContent="foto pronta ✓"; stopCamera(); },"image/jpeg",0.82);
+  });
+  $("#btnLib").addEventListener("click",()=>$("#f_photo_lib").click());
+  $("#f_photo_cam").addEventListener("change",onPhoto);
+  $("#f_photo_lib").addEventListener("change",onPhoto);
+  $("#saveItem").addEventListener("click",()=>saveItem(id));
+  if(id){ loadMov(id); $("#m_add").addEventListener("click",()=>registrarMov(id)); }
+}
+
+async function saveItem(id){
+  const btn=$("#saveItem");btn.disabled=true;btn.textContent="Salvando…";
+  try{
+    const name=$("#f_name").value.trim();
+    if(!name){toast("Informe o nome");btn.disabled=false;btn.textContent="Salvar";return;}
+    const unidade=$("#f_unidade").value;
+    if(!unidade){toast("Selecione a unidade (Lola CCMQ, Central ou Lola MAC)");btn.disabled=false;btn.textContent="Salvar";return;}
+    const local=$("#f_local").value;
+    let photo_url=id?(state.items.find(x=>x.id===id)||{}).photo_url:null;
+    const file=state.pendingPhoto;
+    if(file){
+      const path=`itens/${Date.now()}_${Math.random().toString(36).slice(2,7)}.jpg`;
+      const {error:upErr}=await sb.storage.from("loucas").upload(path,file,{upsert:true,contentType:"image/jpeg"});
+      if(upErr)throw upErr;
+      photo_url=sb.storage.from("loucas").getPublicUrl(path).data.publicUrl;
+    }
+    const payload={
+      name, unidade, local, medida:$("#f_medida").value.trim()||null, reference:$("#f_reference").value.trim()||null,
+      supplier:$("#f_supplier").value.trim()||null, color:$("#f_color").value.trim()||null,
+      category:$("#f_category").value.trim()||null, quantity:parseInt($("#f_quantity").value||"0",10),
+      estoque_minimo:$("#f_min").value!==""?parseInt($("#f_min").value,10):null,
+      notes:$("#f_notes").value.trim()||null, photo_url, updated_at:new Date().toISOString()
+    };
+    const {error}= id? await sb.from("lola_loucas_itens").update(payload).eq("id",id)
+                      : await sb.from("lola_loucas_itens").insert(payload);
+    if(error)throw error;
+    closeModal();toast(id?"Item atualizado":"Item cadastrado");renderCatalogo();
+  }catch(err){console.error(err);toast("Erro ao salvar: "+(err.message||""));btn.disabled=false;btn.textContent="Salvar";}
+}
+
+async function delItem(id){
+  if(!confirm("Excluir este item do catálogo?"))return;
+  const {error}=await sb.from("lola_loucas_itens").delete().eq("id",id);
+  if(error){toast("Erro ao excluir");return;}
+  toast("Item excluído");renderCatalogo();
+}
+
+function imprimirContagem(items){
+  const cat=state.fCategoria||"Todas as categorias";
+  const hoje=new Date().toLocaleDateString("pt-BR");
+  const linhas=items.map(i=>`<tr><td>${esc(i.name)}</td><td>${esc(i.medida||"")}</td><td>${esc(i.local||"")}</td><td>${esc(i.unidade||"")}</td><td>${esc(i.category||"")}</td><td class="c">${i.quantity||0}</td><td class="c"></td><td class="c"></td></tr>`).join("");
+  const css="*{font-family:Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}h1{font-size:18px;margin:0 0 2px;color:#A8272A}.sub{font-size:12px;color:#444;margin-bottom:12px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #888;padding:5px 7px;text-align:left}th{background:#f1ebe2}td.c{text-align:center}tbody tr td{height:24px}.foot{margin-top:22px;font-size:12px}@page{margin:12mm}";
+  const html=`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Contagem - ${esc(cat)}</title><style>${css}</style></head><body><h1>Contagem · Louças e Utensílios</h1><div class="sub">Categoria: <b>${esc(cat)}</b> · ${items.length} itens · ${hoje}</div><table><thead><tr><th>Item</th><th>Medida</th><th>Local</th><th>Unidade</th><th>Categoria</th><th>Sistema</th><th>Contado</th><th>Dif.</th></tr></thead><tbody>${linhas}</tbody></table><div class="foot">Conferido por: __________________________&nbsp;&nbsp;&nbsp; Assinatura: __________________________</div><scr`+`ipt>window.onload=function(){setTimeout(function(){window.print();},250);};</scr`+`ipt></body></html>`;
+  const w=window.open("","_blank");
+  if(!w){toast("Permita pop-ups para imprimir a contagem");return;}
+  w.document.open();w.document.write(html);w.document.close();
+}
+
+async function loadMov(id){
+  const el=$("#movList"); if(!el)return;
+  const {data}=await sb.from("lola_loucas_movimentacoes").select("*").eq("item_id",id).order("data",{ascending:false}).order("created_at",{ascending:false});
+  if(!data||!data.length){el.innerHTML='<div class="mini">Nenhuma movimentação registrada ainda.</div>';return;}
+  el.innerHTML=data.map(m=>{
+    const cls=(m.tipo||'').toLowerCase().replace(/[^a-z]/g,'');
+    return `<div class="movrow"><span class="movtag tipo-${cls}">${esc(m.tipo||'')}</span> <b>${m.quantidade} un</b> ${m.destino?'→ '+esc(m.destino):''} <span class="mini">· ${m.data?new Date(m.data+"T00:00").toLocaleDateString("pt-BR"):''}${m.obs?' · '+esc(m.obs):''}</span></div>`;
+  }).join("");
+}
+
+async function registrarMov(id){
+  const tipo=$("#m_tipo").value; const q=parseInt($("#m_qtd").value||"0",10);
+  if(!q||q<1){toast("Informe a quantidade da movimentação");return;}
+  const mov={item_id:id,tipo,quantidade:q,destino:$("#m_destino").value||null,data:$("#m_data").value||new Date().toISOString().slice(0,10),obs:$("#m_obs").value.trim()||null};
+  const {error}=await sb.from("lola_loucas_movimentacoes").insert(mov);
+  if(error){toast("Erro ao registrar: "+(error.message||""));return;}
+  if($("#m_baixa")&&$("#m_baixa").checked){
+    const cur=parseInt($("#f_quantity").value||"0",10);
+    const novo=tipo==="Entrada"?cur+q:Math.max(0,cur-q);
+    $("#f_quantity").value=novo;
+    await sb.from("lola_loucas_itens").update({quantity:novo,updated_at:new Date().toISOString()}).eq("id",id);
+  }
+  $("#m_obs").value=""; $("#m_qtd").value="1";
+  toast("Movimentação registrada"); loadMov(id); renderCatalogo();
+}
+
+/* ============================================================
+   CONTAGENS (inventários com histórico)
+   ============================================================ */
+async function renderContagens(){
+  main.innerHTML=`<div class="empty">Carregando contagens…</div>`;
+  const {data:sessions}=await sb.from("lola_loucas_contagens").select("*").order("created_at",{ascending:false});
+  main.innerHTML=`
+    <div class="toolbar">
+      <div><h2 style="margin:0;font-size:18px">Contagens de inventário</h2>
+        <div class="mini">Inicie uma contagem, registre as quantidades e guarde o histórico.</div></div>
+      <div class="spacer"></div>
+      <button class="btn" id="novaContagem">+ Nova contagem</button>
+    </div>
+    ${(sessions&&sessions.length)? `<div class="list">${sessions.map(s=>`
+      <div class="listitem" data-open="${s.id}">
+        <div style="flex:1">
+          <div style="font-weight:700">${esc(s.name)}</div>
+          <div class="mini">Criada em ${new Date(s.created_at).toLocaleDateString("pt-BR")}${s.closed_at?` · fechada em ${new Date(s.closed_at).toLocaleDateString("pt-BR")}`:""}</div>
+        </div>
+        <span class="badge ${s.status}">${s.status}</span>
+      </div>`).join("")}</div>`
+      : `<div class="empty">Nenhuma contagem ainda. Crie a primeira!</div>`}`;
+  $("#novaContagem").addEventListener("click",novaContagem);
+  main.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",()=>abrirContagem(b.dataset.open)));
+}
+
+async function novaContagem(){
+  const def="Contagem "+new Date().toLocaleDateString("pt-BR");
+  const name=prompt("Nome da contagem:",def);if(name===null)return;
+  await loadItems();
+  const {data:sess,error}=await sb.from("lola_loucas_contagens").insert({name:name.trim()||def}).select().single();
+  if(error){toast("Erro ao criar");return;}
+  if(state.items.length){
+    const rows=state.items.map(i=>({session_id:sess.id,item_id:i.id,expected_quantity:i.quantity,counted_quantity:null}));
+    await sb.from("lola_loucas_contagem_itens").insert(rows);
+  }
+  toast("Contagem iniciada");abrirContagem(sess.id);
+}
+
+async function abrirContagem(id){
+  main.innerHTML=`<div class="empty">Abrindo contagem…</div>`;
+  const {data:sess}=await sb.from("lola_loucas_contagens").select("*").eq("id",id).single();
+  const {data:entries}=await sb.from("lola_loucas_contagem_itens")
+    .select("*, items:lola_loucas_itens(name,reference,supplier,photo_url)").eq("session_id",id);
+  entries.sort((a,b)=>(a.items?.name||"").localeCompare(b.items?.name||""));
+  const closed=sess.status==="fechada";
+  main.innerHTML=`
+    <button class="back" id="back">← Voltar</button>
+    <div class="row" style="margin-bottom:6px">
+      <h2 style="margin:0;font-size:19px">${esc(sess.name)}</h2>
+      <span class="badge ${sess.status}">${sess.status}</span>
+    </div>
+    <div class="mini" style="margin-bottom:14px">${closed?"Contagem fechada — somente leitura.":"Preencha a quantidade contada de cada item. Diferença = contado − esperado."}</div>
+    <div class="list" style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 14px;box-shadow:var(--shadow)">
+      ${entries.map(e=>countRow(e,closed)).join("")}
+    </div>
+    ${closed?"":`<div class="modal-actions" style="margin-top:16px">
+      <button class="btn" id="salvarContagem">Salvar contagem</button>
+      <button class="btn ghost" id="fecharContagem">Fechar e aplicar ao estoque</button>
+    </div>`}`;
+  $("#back").addEventListener("click",renderContagens);
+  if(!closed){
+    main.querySelectorAll("input[data-entry]").forEach(inp=>inp.addEventListener("input",()=>{
+      const exp=parseInt(inp.dataset.exp||"0",10);const val=inp.value===""?null:parseInt(inp.value,10);
+      const d=$(`#diff_${inp.dataset.entry}`);
+      if(val==null){d.textContent="—";d.className="diff zero";}
+      else{const diff=val-exp;d.textContent=(diff>0?"+":"")+diff;d.className="diff "+(diff>0?"pos":diff<0?"neg":"zero");}
+    }));
+    $("#salvarContagem").addEventListener("click",()=>salvarContagem(id,false));
+    $("#fecharContagem").addEventListener("click",()=>salvarContagem(id,true));
+  }
+}
+
+function countRow(e,closed){
+  const it=e.items||{};const exp=e.expected_quantity||0;const c=e.counted_quantity;
+  let diffTxt="—",diffCls="zero";
+  if(c!=null){const d=c-exp;diffTxt=(d>0?"+":"")+d;diffCls=d>0?"pos":d<0?"neg":"zero";}
+  return `<div class="count-row">
+    <div class="name"><div style="font-weight:600">${esc(it.name)}</div>
+      <div class="mini">${it.reference?esc(it.reference)+" · ":""}esperado: ${exp}</div></div>
+    ${closed? `<div style="font-weight:700">${c!=null?c:"—"}</div>`
+            : `<input type="number" min="0" data-entry="${e.id}" data-exp="${exp}" value="${c!=null?c:""}" placeholder="${exp}">`}
+    <div class="diff ${diffCls}" id="diff_${e.id}">${diffTxt}</div>
+  </div>`;
+}
+
+async function salvarContagem(id,fechar){
+  const inputs=[...main.querySelectorAll("input[data-entry]")];
+  for(const inp of inputs){
+    const val=inp.value===""?null:parseInt(inp.value,10);
+    await sb.from("lola_loucas_contagem_itens").update({counted_quantity:val}).eq("id",inp.dataset.entry);
+  }
+  if(fechar){
+    if(!confirm("Fechar a contagem e atualizar o estoque com as quantidades contadas?"))return;
+    const {data:entries}=await sb.from("lola_loucas_contagem_itens").select("item_id,counted_quantity").eq("session_id",id);
+    for(const e of entries){
+      if(e.counted_quantity!=null)
+        await sb.from("lola_loucas_itens").update({quantity:e.counted_quantity,updated_at:new Date().toISOString()}).eq("id",e.item_id);
+    }
+    await sb.from("lola_loucas_contagens").update({status:"fechada",closed_at:new Date().toISOString()}).eq("id",id);
+    toast("Contagem fechada e estoque atualizado");renderContagens();
+  }else{toast("Contagem salva");}
+}
+
+/* ============================================================
+   EVENTOS (saída e retorno de itens)
+   ============================================================ */
+async function renderEventos(){
+  main.innerHTML=`<div class="empty">Carregando eventos…</div>`;
+  const {data:events}=await sb.from("lola_loucas_eventos").select("*").order("event_date",{ascending:false,nullsFirst:false});
+  main.innerHTML=`
+    <div class="toolbar">
+      <div><h2 style="margin:0;font-size:18px">Eventos</h2>
+        <div class="mini">Monte a lista do evento, registre a origem e dê check no retorno.</div></div>
+      <div class="spacer"></div>
+      <button class="btn" id="novoEvento">+ Novo evento</button>
+    </div>
+    ${(events&&events.length)? `<div class="list">${events.map(ev=>`
+      <div class="listitem" data-open="${ev.id}">
+        <div style="flex:1">
+          <div style="font-weight:700">${esc(ev.name)}</div>
+          <div class="mini">${ev.event_date?new Date(ev.event_date+"T00:00").toLocaleDateString("pt-BR"):"sem data"}${ev.location?" · "+esc(ev.location):""}</div>
+        </div>
+        <span class="badge ${ev.status}">${ev.status.replace("_"," ")}</span>
+      </div>`).join("")}</div>`
+      : `<div class="empty">Nenhum evento ainda. Clique em “Novo evento”.</div>`}`;
+  $("#novoEvento").addEventListener("click",()=>eventoForm());
+  main.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",()=>abrirEvento(b.dataset.open)));
+}
+
+function eventoForm(){
+  openModal(`
+    <h2>Novo evento</h2>
+    <div class="field"><label>Nome do evento *</label><input id="e_name" placeholder="Ex: Casamento Marina & João"></div>
+    <div class="field2">
+      <div class="field"><label>Data</label><input type="date" id="e_date"></div>
+      <div class="field"><label>Local</label><input id="e_location" placeholder="Salão / endereço"></div>
+    </div>
+    <div class="field"><label>Observações</label><textarea id="e_notes" rows="2"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn" id="saveEvento">Criar evento</button>
+      <button class="btn ghost" id="cancel">Cancelar</button>
+    </div>`);
+  $("#cancel").addEventListener("click",closeModal);
+  $("#saveEvento").addEventListener("click",async()=>{
+    const name=$("#e_name").value.trim();if(!name){toast("Informe o nome");return;}
+    const {data,error}=await sb.from("lola_loucas_eventos").insert({
+      name, event_date:$("#e_date").value||null, location:$("#e_location").value.trim()||null,
+      notes:$("#e_notes").value.trim()||null
+    }).select().single();
+    if(error){toast("Erro ao criar");return;}
+    closeModal();toast("Evento criado");abrirEvento(data.id);
+  });
+}
+
+async function abrirEvento(id){
+  main.innerHTML=`<div class="empty">Abrindo evento…</div>`;
+  const {data:ev}=await sb.from("lola_loucas_eventos").select("*").eq("id",id).single();
+  const {data:eitems}=await sb.from("lola_loucas_evento_itens")
+    .select("*, items:lola_loucas_itens(name,reference,photo_url)").eq("event_id",id).order("created_at");
+  const total=(eitems||[]).reduce((a,e)=>a+(e.quantity||0),0);
+  const devolvidos=(eitems||[]).filter(e=>e.returned).length;
+  main.innerHTML=`
+    <button class="back" id="back">← Voltar</button>
+    <div class="row" style="margin-bottom:4px">
+      <h2 style="margin:0;font-size:19px">${esc(ev.name)}</h2>
+      <span class="badge ${ev.status}" id="evStatus">${ev.status.replace("_"," ")}</span>
+    </div>
+    <div class="mini" style="margin-bottom:14px">
+      ${ev.event_date?new Date(ev.event_date+"T00:00").toLocaleDateString("pt-BR"):"sem data"}${ev.location?" · "+esc(ev.location):""}
+      · ${eitems.length} itens · ${total} peças · ${devolvidos}/${eitems.length} devolvidos
+    </div>
+    <div class="toolbar">
+      <button class="btn sm" id="addItemEvt">+ Adicionar item</button>
+      <div class="spacer"></div>
+      <select id="evStatusSel">
+        ${["planejado","em_andamento","concluido"].map(s=>`<option value="${s}" ${ev.status===s?"selected":""}>${s.replace("_"," ")}</option>`).join("")}
+      </select>
+    </div>
+    ${eitems.length? `<div class="list" style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 14px;box-shadow:var(--shadow)">
+      ${eitems.map(evtRow).join("")}</div>`
+      : `<div class="empty">Nenhum item neste evento ainda.</div>`}`;
+  $("#back").addEventListener("click",renderEventos);
+  $("#addItemEvt").addEventListener("click",()=>addItemEvento(id));
+  $("#evStatusSel").addEventListener("change",async e=>{
+    await sb.from("lola_loucas_eventos").update({status:e.target.value}).eq("id",id);
+    const b=$("#evStatus");b.textContent=e.target.value.replace("_"," ");b.className="badge "+e.target.value;
+    toast("Status atualizado");
+  });
+  main.querySelectorAll("[data-ret]").forEach(c=>c.addEventListener("change",()=>toggleReturn(c.dataset.ret,c.checked,id)));
+  main.querySelectorAll("[data-delevt]").forEach(b=>b.addEventListener("click",()=>delEventItem(b.dataset.delevt,id)));
+}
+
+function evtRow(e){
+  const it=e.items||{};
+  return `<div class="evt-row ${e.returned?"returned":""}">
+    <div style="flex:1">
+      <div style="font-weight:600">${esc(it.name)} <span class="mini">× ${e.quantity}</span></div>
+      <div class="mini">${e.origin?"Origem: "+esc(e.origin):it.reference?esc(it.reference):""}</div>
+    </div>
+    <label class="checkwrap"><input type="checkbox" data-ret="${e.id}" ${e.returned?"checked":""}> devolvido</label>
+    <button class="btn ghost sm" data-delevt="${e.id}" title="Remover">🗑</button>
+  </div>`;
+}
+
+async function addItemEvento(eventId){
+  await loadItems();
+  if(!state.items.length){toast("Cadastre itens no catálogo primeiro");return;}
+  openModal(`
+    <h2>Adicionar item ao evento</h2>
+    <div class="field"><label>Item *</label>
+      <select id="ei_item">${state.items.map(i=>`<option value="${i.id}">${esc(i.name)}${i.color?" · "+esc(i.color):""} (estoque: ${i.quantity})</option>`).join("")}</select></div>
+    <div class="field2">
+      <div class="field"><label>Quantidade *</label><input type="number" id="ei_qty" value="1" min="1"></div>
+      <div class="field"><label>Origem (de onde saiu)</label><input id="ei_origin" placeholder="Depósito, loja…"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="saveEi">Adicionar</button>
+      <button class="btn ghost" id="cancel">Cancelar</button>
+    </div>`);
+  $("#cancel").addEventListener("click",closeModal);
+  $("#saveEi").addEventListener("click",async()=>{
+    const item_id=$("#ei_item").value;const quantity=parseInt($("#ei_qty").value||"1",10);
+    const {error}=await sb.from("lola_loucas_evento_itens").insert({event_id:eventId,item_id,quantity,origin:$("#ei_origin").value.trim()||null});
+    if(error){toast("Erro ao adicionar");return;}
+    closeModal();toast("Item adicionado");abrirEvento(eventId);
+  });
+}
+
+async function toggleReturn(eiId,checked,eventId){
+  await sb.from("lola_loucas_evento_itens").update({returned:checked,returned_at:checked?new Date().toISOString():null}).eq("id",eiId);
+  toast(checked?"Marcado como devolvido":"Devolução desfeita");
+  abrirEvento(eventId);
+}
+
+async function delEventItem(eiId,eventId){
+  if(!confirm("Remover este item do evento?"))return;
+  await sb.from("lola_loucas_evento_itens").delete().eq("id",eiId);
+  toast("Item removido");abrirEvento(eventId);
+}
+
+
+/* ============================================================
+   PEDIDOS entre unidades
+   ============================================================ */
+async function renderPedidos(){
+  main.innerHTML=`<div class="empty">Carregando pedidos…</div>`;
+  const {data:peds}=await sb.from("lola_loucas_pedidos").select("*").order("created_at",{ascending:false});
+  main.innerHTML=`
+    <div class="toolbar">
+      <div><h2 style="margin:0;font-size:18px">Pedidos entre unidades</h2>
+        <div class="mini">Transferências de itens entre Central, Lola e MAC.</div></div>
+      <div class="spacer"></div>
+      <button class="btn" id="novoPedido">+ Novo pedido</button>
+    </div>
+    ${(peds&&peds.length)?`<div class="list">${peds.map(pedRow).join("")}</div>`:`<div class="empty">Nenhum pedido ainda. Crie o primeiro!</div>`}`;
+  $("#novoPedido").addEventListener("click",pedidoForm);
+  main.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",()=>abrirPedido(b.dataset.open)));
+}
+function pedRow(p){
+  const st=(p.status||'').toLowerCase().replace(/[^a-z]/g,'');
+  return `<div class="listitem" data-open="${p.id}">
+    <div style="flex:1"><div style="font-weight:700">${esc(p.origem_unidade||'')} → ${esc(p.destino_unidade||'')}</div>
+      <div class="mini">Solicitado ${p.data_solicitado?new Date(p.data_solicitado+"T00:00").toLocaleDateString("pt-BR"):''}${p.obs?' · '+esc(p.obs):''}</div></div>
+    <span class="badge ped-${st}">${esc(p.status||'')}</span></div>`;
+}
+async function pedidoForm(){
+  await loadItems();
+  if(!state.items.length){toast("Cadastre itens no catálogo primeiro");return;}
+  openModal(`
+    <h2>Novo pedido</h2>
+    <div class="field2">
+      <div class="field"><label>De (origem) *</label><select id="p_origem"><option value="">Selecione…</option>${UNIDADES.map(u=>`<option>${esc(u)}</option>`).join("")}</select></div>
+      <div class="field"><label>Para (destino) *</label><select id="p_destino"><option value="">Selecione…</option>${UNIDADES.map(u=>`<option>${esc(u)}</option>`).join("")}</select></div>
+    </div>
+    <div class="field"><label>Observação</label><input id="p_obs" placeholder="ex: para o evento de sábado"></div>
+    <div class="field"><label>Itens do pedido</label>
+      <div id="p_itens" class="movlist"></div>
+      <div class="field2" style="margin-top:6px">
+        <div class="field"><label>Item</label><select id="p_pick">${state.items.map(i=>`<option value="${i.id}">${esc(i.name)}${i.unidade?' · '+esc(i.unidade):''}${i.local?' ('+esc(i.local)+')':''} — ${i.quantity}</option>`).join("")}</select></div>
+        <div class="field"><label>Qtd</label><input type="number" id="p_pickqty" min="1" value="1"></div>
+      </div>
+      <button type="button" class="btn ghost sm" id="p_additem" style="margin-top:6px">+ Adicionar à lista</button>
+    </div>
+    <div class="modal-actions"><button class="btn" id="p_save">Criar pedido</button><button class="btn ghost" id="cancel">Cancelar</button></div>`);
+  $("#cancel").addEventListener("click",closeModal);
+  const lista=[];
+  const draw=()=>{
+    $("#p_itens").innerHTML=lista.length?lista.map((it,idx)=>`<div class="movrow"><span style="flex:1">${esc(it.nome)} <b>× ${it.qtd}</b></span> <button type="button" class="iconbtn" data-rm="${idx}">🗑</button></div>`).join(""):'<div class="mini">Nenhum item adicionado.</div>';
+    $("#p_itens").querySelectorAll("[data-rm]").forEach(b=>b.addEventListener("click",()=>{lista.splice(+b.dataset.rm,1);draw();}));
+  };
+  draw();
+  $("#p_additem").addEventListener("click",()=>{
+    const sel=$("#p_pick"); const id=sel.value; const nome=(state.items.find(x=>x.id===id)||{}).name||"";
+    const qtd=parseInt($("#p_pickqty").value||"1",10);
+    if(!id||qtd<1){toast("Escolha o item e a quantidade");return;}
+    lista.push({item_id:id,nome,qtd}); draw();
+  });
+  $("#p_save").addEventListener("click",async()=>{
+    const origem=$("#p_origem").value,destino=$("#p_destino").value;
+    if(!origem||!destino){toast("Escolha origem e destino");return;}
+    if(origem===destino){toast("Origem e destino devem ser diferentes");return;}
+    if(!lista.length){toast("Adicione ao menos um item");return;}
+    const {data:ped,error}=await sb.from("lola_loucas_pedidos").insert({origem_unidade:origem,destino_unidade:destino,obs:$("#p_obs").value.trim()||null}).select().single();
+    if(error){toast("Erro ao criar: "+(error.message||""));return;}
+    await sb.from("lola_loucas_pedido_itens").insert(lista.map(it=>({pedido_id:ped.id,item_id:it.item_id,item_nome:it.nome,quantidade:it.qtd})));
+    closeModal();toast("Pedido criado");abrirPedido(ped.id);
+  });
+}
+async function abrirPedido(id){
+  main.innerHTML=`<div class="empty">Abrindo pedido…</div>`;
+  const {data:p}=await sb.from("lola_loucas_pedidos").select("*").eq("id",id).single();
+  const {data:itens}=await sb.from("lola_loucas_pedido_itens").select("*").eq("pedido_id",id);
+  const st=(p.status||'').toLowerCase().replace(/[^a-z]/g,'');
+  const dt=v=>v?new Date(v+"T00:00").toLocaleDateString("pt-BR"):'';
+  main.innerHTML=`
+    <button class="back" id="back">← Voltar</button>
+    <div class="row" style="margin-bottom:4px"><h2 style="margin:0;font-size:19px">${esc(p.origem_unidade)} → ${esc(p.destino_unidade)}</h2><span class="badge ped-${st}">${esc(p.status)}</span></div>
+    <div class="mini" style="margin-bottom:14px">Solicitado ${dt(p.data_solicitado)}${p.data_enviado?' · Enviado '+dt(p.data_enviado):''}${p.data_recebido?' · Recebido '+dt(p.data_recebido):''}${p.obs?' · '+esc(p.obs):''}</div>
+    <div class="list" style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 14px;box-shadow:var(--shadow)">
+      ${itens.map(it=>`<div class="evt-row"><div style="flex:1">${esc(it.item_nome||'(item)')}</div><b>${it.quantidade} un</b></div>`).join("")}
+    </div>
+    <div class="modal-actions" style="margin-top:16px">
+      ${p.status==='Solicitado'?`<button class="btn" id="p_enviar">Marcar como Enviado</button>`:''}
+      ${p.status==='Enviado'?`<button class="btn" id="p_receber">Marcar como Recebido (atualiza estoque)</button>`:''}
+      ${p.status!=='Recebido'?`<button class="btn ghost" id="p_del">Excluir pedido</button>`:`<span class="mini">Pedido concluído ✓ — estoque atualizado.</span>`}
+    </div>`;
+  $("#back").addEventListener("click",renderPedidos);
+  const e=$("#p_enviar"); if(e)e.addEventListener("click",async()=>{await sb.from("lola_loucas_pedidos").update({status:'Enviado',data_enviado:new Date().toISOString().slice(0,10)}).eq("id",id);toast("Pedido enviado");abrirPedido(id);});
+  const r=$("#p_receber"); if(r)r.addEventListener("click",()=>receberPedido(id,p,itens));
+  const d=$("#p_del"); if(d)d.addEventListener("click",async()=>{if(!confirm("Excluir este pedido?"))return;await sb.from("lola_loucas_pedidos").delete().eq("id",id);toast("Pedido excluído");renderPedidos();});
+}
+async function receberPedido(id,p,itens){
+  if(!confirm("Marcar como recebido e atualizar o estoque (baixa na origem, entrada no destino)?"))return;
+  await loadItems();
+  for(const it of itens){
+    const q=it.quantidade||0; if(q<1)continue;
+    const origin=it.item_id?state.items.find(x=>x.id===it.item_id):null;
+    if(origin){
+      await sb.from("lola_loucas_itens").update({quantity:Math.max(0,(origin.quantity||0)-q),updated_at:new Date().toISOString()}).eq("id",origin.id);
+      await sb.from("lola_loucas_movimentacoes").insert({item_id:origin.id,tipo:'Transferência',quantidade:q,origem:origin.local,destino:p.destino_unidade,obs:'Pedido para '+p.destino_unidade});
+    }
+    const nome=(it.item_nome||(origin&&origin.name)||'').trim().toLowerCase();
+    const dest=state.items.find(x=>x.unidade===p.destino_unidade && (x.name||'').trim().toLowerCase()===nome && (!origin||x.id!==origin.id));
+    if(dest){
+      await sb.from("lola_loucas_itens").update({quantity:(dest.quantity||0)+q,updated_at:new Date().toISOString()}).eq("id",dest.id);
+      await sb.from("lola_loucas_movimentacoes").insert({item_id:dest.id,tipo:'Entrada',quantidade:q,destino:dest.local,obs:'Recebido de '+p.origem_unidade});
+    }else if(origin){
+      const {data:created}=await sb.from("lola_loucas_itens").insert({name:origin.name,reference:origin.reference,supplier:origin.supplier,color:origin.color,category:origin.category,medida:origin.medida,unidade:p.destino_unidade,local:null,quantity:q}).select().single();
+      if(created)await sb.from("lola_loucas_movimentacoes").insert({item_id:created.id,tipo:'Entrada',quantidade:q,obs:'Recebido de '+p.origem_unidade+' (novo item criado)'});
+    }
+  }
+  await sb.from("lola_loucas_pedidos").update({status:'Recebido',data_recebido:new Date().toISOString().slice(0,10)}).eq("id",id);
+  toast("Pedido recebido — estoque atualizado"); abrirPedido(id);
+}
+
+/* ============================================================
+   QUEBRAS
+   ============================================================ */
+async function renderQuebras(){
+  main.innerHTML=`<div class="empty">Carregando quebras…</div>`;
+  const {data}=await sb.from("lola_loucas_movimentacoes").select("*, lola_loucas_itens(name,unidade,local)").eq("tipo","Quebra").order("data",{ascending:false}).order("created_at",{ascending:false});
+  const total=(data||[]).reduce((a,m)=>a+(m.quantidade||0),0);
+  main.innerHTML=`
+    <div class="toolbar">
+      <div><h2 style="margin:0;font-size:18px">Quebras</h2><div class="mini">Baixas por quebra/perda · total ${total} un.</div></div>
+      <div class="spacer"></div>
+      <button class="btn" id="novaQuebra">+ Registrar quebra</button>
+    </div>
+    ${(data&&data.length)?`<div class="list">${data.map(m=>{const it=m.lola_loucas_itens||{};return `<div class="listitem"><div style="flex:1"><div style="font-weight:700">${esc(it.name||'(item removido)')}</div><div class="mini">${m.data?new Date(m.data+"T00:00").toLocaleDateString("pt-BR"):''}${it.unidade?' · '+esc(it.unidade):''}${it.local?' · '+esc(it.local):''}${m.obs?' · '+esc(m.obs):''}</div></div><span class="badge" style="background:#fbe9e7;color:#c2453f">${m.quantidade} un</span></div>`;}).join("")}</div>`:`<div class="empty">Nenhuma quebra registrada.</div>`}`;
+  $("#novaQuebra").addEventListener("click",quebraForm);
+}
+async function quebraForm(){
+  await loadItems();
+  if(!state.items.length){toast("Cadastre itens no catálogo primeiro");return;}
+  openModal(`
+    <h2>Registrar quebra</h2>
+    <div class="field"><label>Item *</label><select id="q_item">${state.items.map(i=>`<option value="${i.id}">${esc(i.name)}${i.unidade?' · '+esc(i.unidade):''}${i.local?' ('+esc(i.local)+')':''} — ${i.quantity}</option>`).join("")}</select></div>
+    <div class="field2">
+      <div class="field"><label>Quantidade *</label><input type="number" id="q_qtd" min="1" value="1"></div>
+      <div class="field"><label>Data</label><input type="date" id="q_data" value="${new Date().toISOString().slice(0,10)}"></div>
+    </div>
+    <div class="field"><label>Observação</label><input id="q_obs" placeholder="ex: caiu na lavagem"></div>
+    <div class="modal-actions"><button class="btn" id="q_save">Registrar</button><button class="btn ghost" id="cancel">Cancelar</button></div>`);
+  $("#cancel").addEventListener("click",closeModal);
+  $("#q_save").addEventListener("click",async()=>{
+    const item_id=$("#q_item").value; const q=parseInt($("#q_qtd").value||"0",10);
+    if(!q||q<1){toast("Informe a quantidade");return;}
+    const {error}=await sb.from("lola_loucas_movimentacoes").insert({item_id,tipo:'Quebra',quantidade:q,data:$("#q_data").value||new Date().toISOString().slice(0,10),obs:$("#q_obs").value.trim()||null});
+    if(error){toast("Erro ao registrar: "+(error.message||""));return;}
+    const it=state.items.find(x=>x.id===item_id);
+    if(it)await sb.from("lola_loucas_itens").update({quantity:Math.max(0,(it.quantity||0)-q),updated_at:new Date().toISOString()}).eq("id",item_id);
+    closeModal();toast("Quebra registrada");renderQuebras();
+  });
+}
+
+function voltarMenu(){try{if(window.parent&&window.parent!==window){window.parent.postMessage({lola:'voltar-menu'},'*');return;}}catch(e){}try{history.back();}catch(e2){}}
+function hdrBusca(){var i=document.querySelector('#main input.search, #main input[type=search], #main input[placeholder*="usc"]');if(i){try{i.scrollIntoView({block:'center',behavior:'smooth'});i.focus();}catch(e){}}}
+/* ---------- start ---------- */
+render();
+</script>
+</body>
+</html>
