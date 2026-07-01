@@ -22,14 +22,13 @@
   body{margin:0;font-family:'Hanken Grotesk',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
        background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
   header{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid #EFE6DC;color:var(--ink)}
-  .bar{display:flex;align-items:center;flex-wrap:nowrap;gap:10px;padding:12px 15px}
+  .bar{display:flex;align-items:center;flex-wrap:nowrap;gap:10px;padding:12px 15px;max-width:1500px;margin:0}
   .hdr-menu,.hdr-ic{width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--line);color:var(--brand);border-radius:13px;cursor:pointer;padding:0;font-size:20px}
   .hdr-mid{flex:1;min-width:0}
   .hdr{max-width:1500px;margin:0;padding:16px 20px 12px}
   .hdr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
   .hdr-title{font-family:var(--serif);font-style:normal;font-weight:600;font-size:20px;color:var(--brand);line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .hdr-sub{font-size:12px;font-weight:600;color:#8A7A72;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .hdr-sub{color:rgba(255,255,255,.82);font-size:13px;font-weight:500;margin-top:4px;min-height:17px}
+  .hdr-sub{color:#8A7A72;font-size:12px;font-weight:600;margin-top:1px;min-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .hdr-add{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:0;background:#fff;color:var(--brand);
            font-size:24px;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center}
   .hdr-add:hover{background:#fff5f2}
@@ -200,7 +199,8 @@
 <header>
   <div class="bar">
     <button class="hdr-menu" onclick="voltarMenu()" title="Menu"><i class="ph-duotone ph-caret-left"></i></button>
-    <div class="hdr-mid"><div class="hdr-title">Louças &amp; Utensílios</div><div class="hdr-sub">Catálogo, contagens e eventos</div></div>
+    <div class="hdr-mid"><div class="hdr-title">Louças &amp; Utensílios</div><div class="hdr-sub" id="hdrSub"></div></div>
+    <button class="hdr-ic" id="hdrAdd" title="Adicionar"><i class="ph-duotone ph-plus"></i></button>
     <button class="hdr-ic" onclick="hdrBusca()" title="Buscar"><i class="ph-duotone ph-magnifying-glass"></i></button>
     <button class="hdr-ic" title="Notificações"><i class="ph-duotone ph-bell"></i></button>
   </div>
