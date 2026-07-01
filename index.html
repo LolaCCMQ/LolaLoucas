@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.css">
 <style>
   :root{
     --bg:#FBF7F1; --card:#ffffff; --ink:#2A1A17; --muted:#92837B;
@@ -20,19 +21,24 @@
   *{box-sizing:border-box}
   body{margin:0;font-family:'Hanken Grotesk',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
        background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
-  header{position:sticky;top:0;z-index:30;background:var(--grad);color:#fff}
+  header{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid #EFE6DC;color:var(--ink)}
+  .bar{display:flex;align-items:center;flex-wrap:nowrap;gap:10px;padding:12px 15px;max-width:1500px;margin:0}
+  .hdr-menu,.hdr-ic{width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--line);color:var(--brand);border-radius:13px;cursor:pointer;padding:0;font-size:20px}
+  .hdr-mid{flex:1;min-width:0}
   .hdr{max-width:1500px;margin:0;padding:16px 20px 12px}
   .hdr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-  .hdr-title{font-family:var(--serif);font-style:normal;font-weight:600;font-size:26px;color:#fff;line-height:1.1}
-  .hdr-sub{color:rgba(255,255,255,.82);font-size:13px;font-weight:500;margin-top:4px;min-height:17px}
+  .hdr-title{font-family:var(--serif);font-style:normal;font-weight:600;font-size:20px;color:var(--brand);line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hdr-sub{color:#8A7A72;font-size:12px;font-weight:600;margin-top:1px;min-height:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .hdr-add{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:0;background:#fff;color:var(--brand);
            font-size:24px;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center}
   .hdr-add:hover{background:#fff5f2}
-  nav{display:flex;gap:6px;margin-top:14px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
-  nav button{border:0;background:rgba(255,255,255,.16);color:#fff;font-weight:600;font-size:13px;
-             padding:7px 13px;border-radius:999px;cursor:pointer;white-space:nowrap}
+ 
+  nav{display:flex;gap:6px;margin-top:0;padding:11px 15px 0;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  nav button{border:0;background:var(--card);color:var(--brand);font-weight:600;font-size:12.5px;padding:8px 12px;border-radius:11px;cursor:pointer;white-space:nowrap;box-shadow:inset 0 0 0 1px #E9DDD0;display:flex;align-items:center;gap:5px}
+  nav button i{font-size:16px}
+  nav button:hover{background:var(--warm)}
   nav button:hover{background:rgba(255,255,255,.26)}
-  nav button.active{background:#fff;color:var(--brand);font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+  nav button.active{background:var(--brand);color:#fff;font-weight:700;box-shadow:none}
   main h2{font-family:var(--serif);font-style:normal;font-weight:600;color:var(--ink)}
   main{max-width:1500px;margin:0;padding:16px 20px 80px}
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
@@ -166,7 +172,7 @@
   .mc-actions .iconbtn{font-size:19px;padding:5px 9px;margin-left:5px}
   @media(max-width:560px){
     .field2{grid-template-columns:1fr}
-    .bar{flex-wrap:wrap;gap:10px;padding:10px 12px}
+    .bar{display:flex;align-items:center;flex-wrap:nowrap;gap:10px;padding:12px 15px}
     header{border-bottom:none}
     /* menu: tudo numa linha so */
     nav{width:100%;margin-left:0;overflow:visible;gap:3px;flex-wrap:nowrap}
@@ -186,27 +192,38 @@
     .fab{display:none}
     main{padding-bottom:96px}
   }
+  @media(max-width:640px){
+    .tablewrap{overflow-x:visible;border:0;background:transparent;box-shadow:none;border-radius:0;padding:0}
+    .grid-table,.grid-table tbody{display:block;width:100%}
+    .grid-table thead{display:none}
+    .grid-table tr{display:block;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);margin-bottom:12px;padding:12px 14px}
+    .grid-table td{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:5px 0;border:0 !important;white-space:normal;text-align:right}
+    .grid-table td::before{content:attr(data-label);font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;text-align:left;flex:0 0 auto}
+    .grid-table td[data-label=""]{display:none}
+    .grid-table td.tcell-nome{display:block;text-align:left;font-size:16px;font-weight:800;color:var(--ink);padding:0 0 6px;border-bottom:1px solid var(--line) !important;margin-bottom:6px}
+    .grid-table td.tcell-nome::before{display:none}
+    .grid-table td.tcell-acoes{justify-content:flex-end}
+    .grid-table td.tcell-acoes::before{display:none}
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="hdr">
-    <div class="hdr-top">
-      <div>
-        <div class="hdr-title">Louças &amp; Utensílios</div>
-        <div class="hdr-sub" id="hdrSub"></div>
-      </div>
-      <button class="hdr-add" id="hdrAdd" title="Adicionar">+</button>
-    </div>
-    <nav id="nav">
-      <button data-view="catalogo" class="active">Catálogo</button>
-      <button data-view="contagens">Contagens</button>
-      <button data-view="eventos">Eventos</button>
-      <button data-view="pedidos">Pedidos</button>
-      <button data-view="quebras">Quebras</button>
-    </nav>
+  <div class="bar">
+    <button class="hdr-menu" onclick="voltarMenu()" title="Menu"><i class="ph-duotone ph-caret-left"></i></button>
+    <div class="hdr-mid"><div class="hdr-title">Louças &amp; Utensílios</div><div class="hdr-sub" id="hdrSub"></div></div>
+    <button class="hdr-ic" id="hdrAdd" title="Adicionar"><i class="ph-duotone ph-plus"></i></button>
+    <button class="hdr-ic" onclick="hdrBusca()" title="Buscar"><i class="ph-duotone ph-magnifying-glass"></i></button>
+    <button class="hdr-ic" title="Notificações"><i class="ph-duotone ph-bell"></i></button>
   </div>
+  <nav id="nav">
+    <button data-view="catalogo" class="active"><i class="ph-duotone ph-squares-four"></i>Catálogo</button>
+    <button data-view="contagens"><i class="ph-duotone ph-list-checks"></i>Contagens</button>
+    <button data-view="eventos"><i class="ph-duotone ph-calendar-dots"></i>Eventos</button>
+    <button data-view="pedidos"><i class="ph-duotone ph-shopping-cart"></i>Pedidos</button>
+    <button data-view="quebras"><i class="ph-duotone ph-warning"></i>Quebras</button>
+  </nav>
 </header>
 
 <main id="main"><div class="empty">Carregando…</div></main>
@@ -973,6 +990,8 @@ async function quebraForm(){
   });
 }
 
+function voltarMenu(){try{if(window.parent&&window.parent!==window){window.parent.postMessage({lola:'voltar-menu'},'*');return;}}catch(e){}try{history.back();}catch(e2){}}
+function hdrBusca(){var i=document.querySelector('#main input.search, #main input[type=search], #main input[placeholder*="usc"]');if(i){try{i.scrollIntoView({block:'center',behavior:'smooth'});i.focus();}catch(e){}}}
 /* ---------- start ---------- */
 render();
 </script>
